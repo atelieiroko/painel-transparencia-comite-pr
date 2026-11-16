@@ -98,6 +98,7 @@ h2{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:26px;ma
 .tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
 th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th.nosort{cursor:default}
 th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);position:sticky;top:0;cursor:pointer;white-space:nowrap;user-select:none}
 th[aria-sort="ascending"]::after{content:" ▲"}
 th[aria-sort="descending"]::after{content:" ▼"}
@@ -116,6 +117,13 @@ tr.detail td{background:var(--surface-2);font-size:13px}
 .caravanas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:6px 24px;margin:10px 0 6px}
 .caravanas ol{margin:6px 0 10px;padding-left:22px;font-size:14px;color:var(--ink-2)}
 .munlist{columns:2 160px;column-gap:20px;font-size:14px;color:var(--ink-2);margin:8px 0 0;padding-left:18px}
+.callout{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 14px;font-size:14.5px}
+.callout b{color:var(--accent)}
+.callout .ic{font-size:20px;line-height:1.2}
+td.tog{width:1%;white-space:nowrap}
+.togbtn{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);background:transparent;white-space:nowrap}
+tr.row[aria-expanded="true"] .togbtn{background:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){tr.row[aria-expanded="true"] .togbtn{color:#1d1c19}}
 .tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px;border:1px solid var(--line);white-space:nowrap}
 .tag.ok{color:var(--ok)}
 .tag.adj{color:var(--warn)}
@@ -235,7 +243,8 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
 
   <section id="acoes">
     <h2>Lista de ações</h2>
-    <p class="sub">Clique em uma linha para ver municípios, local, parceiros, públicos e detalhes. Clique no título de uma coluna para ordenar.</p>
+    <p class="sub">Clique no título de uma coluna para ordenar a lista.</p>
+    <div class="callout" role="note"><span class="ic">👆</span><div><b>Abra cada ação para ver todas as informações.</b> A tabela mostra só o resumo. Clique em <b>“▸ Abrir”</b> (ou em qualquer ponto da linha) para ver municípios, local, parceiros, públicos atendidos, ação sociocultural e os links de comprovação: <b>fotos, lista de presença e divulgação</b>. Clique de novo para fechar.</div></div>
     <div class="tablebar">
       <span class="count" id="count2" style="margin:0"></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="copy">Copiar dados (CSV)</button><button class="primary" type="button" id="csv">Baixar dados filtrados (CSV)</button></span>
@@ -243,6 +252,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
     <div class="tablewrap">
       <table id="tbl">
         <thead><tr>
+          <th class="nosort">Detalhes</th>
           <th data-k="inicio" aria-sort="descending">Data</th>
           <th data-k="nome">Ação</th>
           <th data-k="tipo">Meta</th>
@@ -320,7 +330,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
     <h2>Perguntas frequentes</h2>
     <details class="faq"><summary>Quantas pessoas o Comitê alcançou?</summary><p>O painel mostra participações: a soma do público de cada ação. Como a mesma pessoa pode ter participado de mais de uma atividade, esse número não equivale ao total de pessoas diferentes alcançadas.</p></details>
     <details class="faq"><summary>Como encontro uma ação específica?</summary><p>Digite parte do nome, do local ou de um parceiro no campo “Buscar”. A lista de ações e todos os números se ajustam ao que você digitou.</p></details>
-    <details class="faq"><summary>Como confiro se uma ação aconteceu?</summary><p>Na lista de ações, clique na linha da atividade. Em “Comprovação da atividade” estão os links das fotos, da lista de presença e das publicações de divulgação, cada um em seu campo.</p></details>
+    <details class="faq"><summary>Como confiro se uma ação aconteceu?</summary><p>Na lista de ações, clique em “▸ Abrir” na linha da atividade. Em “Comprovação da atividade” estão os links das fotos, da lista de presença e das publicações de divulgação, cada um em seu campo.</p></details>
     <details class="faq"><summary>O que significa “Validada após ajuste”?</summary><p>Que a conferência pediu correções ou novos comprovantes (por exemplo, retificar o número de participantes ou apresentar lista de presença) e a ação foi aprovada depois do ajuste. É um sinal de que o controle funcionou, não de irregularidade.</p></details>
     <details class="faq"><summary>Posso usar estes dados em uma pesquisa ou reportagem?</summary><p>Sim. Use o botão “Baixar dados filtrados (CSV)” (ou “Copiar dados” e cole numa planilha) e cite como fonte: Comitê de Cultura do Paraná / Programa Nacional dos Comitês de Cultura, planilha de conferência de validação, versão de 03/06/2026.</p></details>
     <details class="faq"><summary>Por que há uma ação em Brasília?</summary><p>Foi a participação da Rede de Comunicadores Populares no encontro nacional do PNCC, em Brasília. A ação conta no total de ações e participações, mas não na contagem de municípios do Paraná.</p></details>
@@ -470,6 +480,7 @@ function table(rows){
   s.slice(page*PER,page*PER+PER).forEach(a=>{
     const tr=document.createElement('tr'); tr.className='row'; tr.tabIndex=0; tr.setAttribute('aria-expanded',open.has(a.id));
     const td=(t,c)=>{const e=document.createElement('td'); if(c) e.className=c; if(t instanceof Node) e.appendChild(t); else e.textContent=t; tr.appendChild(e); return e;};
+    const tb2=document.createElement('button'); tb2.type='button'; tb2.className='togbtn'; tb2.textContent=open.has(a.id)?'▾ Fechar':'▸ Abrir'; tb2.setAttribute('aria-label',(open.has(a.id)?'Fechar':'Abrir')+' detalhes da ação '+(a.nome||'')); td(tb2,'tog');
     td(fmtD(a.inicio),'date'); td(a.nome||'—');
     const mt=document.createElement('span'); const dt=document.createElement('i'); dt.className='dot'; dt.style.background=COLOR_TIPO[a.tipo]||'var(--muted)'; mt.append(dt,document.createTextNode(a.tipo)); td(mt);
     td(a.osc); td(a.municipio); td(fmtN(a.participantes),'num'); td(fmtN(a.carga),'num');
@@ -478,7 +489,7 @@ function table(rows){
     tr.addEventListener('click',toggle); tr.addEventListener('keydown',e=>{if(e.key==='Enter'){toggle();}});
     tb.appendChild(tr);
     if(open.has(a.id)){
-      const d=document.createElement('tr'); d.className='detail'; const c=document.createElement('td'); c.colSpan=8;
+      const d=document.createElement('tr'); d.className='detail'; const c=document.createElement('td'); c.colSpan=9;
       const dl=document.createElement('div'); dl.className='dl';
       const item=(l,v)=>{const x=document.createElement('div'); const sp=document.createElement('span'); sp.textContent=l; x.append(sp,document.createTextNode(v||'—')); dl.appendChild(x);};
       item('Período',fmtD(a.inicio)+(a.fim&&a.fim!==a.inicio?' a '+fmtD(a.fim):''));
@@ -514,9 +525,9 @@ function table(rows){
   });
   $('#pinfo').textContent='Página '+(page+1)+' de '+pages;
   $('#prev').disabled=page===0; $('#next').disabled=page>=pages-1;
-  document.querySelectorAll('#tbl th').forEach(th=>th.setAttribute('aria-sort',th.dataset.k===sortK?(sortDir>0?'ascending':'descending'):'none'));
+  document.querySelectorAll('#tbl th[data-k]').forEach(th=>th.setAttribute('aria-sort',th.dataset.k===sortK?(sortDir>0?'ascending':'descending'):'none'));
 }
-document.querySelectorAll('#tbl th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==='inicio'||k==='participantes'||k==='carga')?-1:1;} page=0; render();}));
+document.querySelectorAll('#tbl th[data-k]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==='inicio'||k==='participantes'||k==='carga')?-1:1;} page=0; render();}));
 $('#prev').addEventListener('click',()=>{page--; render();});
 $('#next').addEventListener('click',()=>{page++; render();});
 
