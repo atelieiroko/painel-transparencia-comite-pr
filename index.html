@@ -62,6 +62,10 @@ h2{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:26px;ma
 .kpi .v{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
 .kpi .l{font-weight:600;margin-top:4px}
 .kpi .h{font-size:12.5px;color:var(--ink-3);margin-top:4px;line-height:1.4}
+.kpi.rev{border:2px dashed var(--warn);position:relative}
+.badge-rev{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+@media (prefers-color-scheme: dark){.badge-rev{color:#1d1c19}}
+.kpi.rev .v{opacity:.85}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 14px;min-width:0}
@@ -175,9 +179,9 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
       <div class="kpi"><div class="v" id="kTotal">—</div><div class="l">total de ações</div><div class="h" id="kTotalH">Ações validadas + ações socioculturais associadas.</div></div>
       <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l">ações validadas</div><div class="h">Atividades de formação, mobilização e comunicação registradas e aprovadas na conferência.</div></div>
       <div class="kpi"><div class="v" id="kSc">—</div><div class="l">com ação sociocultural</div><div class="h">Ações validadas que incluíram apresentação artística ou cultural associada.</div></div>
-      <div class="kpi"><div class="v" id="kPart">—</div><div class="l">participações</div><div class="h">Soma do público de cada ação. Uma pessoa que foi a duas ações conta duas vezes.</div></div>
+      <div class="kpi rev"><span class="badge-rev">⚠ Em revisão</span><div class="v" id="kPart">—</div><div class="l">participações</div><div class="h">Soma do público de cada ação. Uma pessoa que foi a duas ações conta duas vezes. Número em revisão, sujeito a alteração.</div></div>
       <div class="kpi"><div class="v" id="kHoras">—</div><div class="l">horas de atividade</div><div class="h">Soma da carga horária informada para cada ação.</div></div>
-      <div class="kpi"><div class="v" id="kMun">—</div><div class="l">municípios do Paraná</div><div class="h" id="kMunH">Com ao menos uma ação presencial ou híbrida, incluindo as caravanas itinerantes.</div></div>
+      <div class="kpi rev"><span class="badge-rev">⚠ Em revisão</span><div class="v" id="kMun">—</div><div class="l">municípios do Paraná</div><div class="h" id="kMunH">Com ao menos uma ação presencial ou híbrida, incluindo as caravanas itinerantes.</div></div>
     </div>
   </section>
 
@@ -259,6 +263,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
     <p class="sub">Transparência também é explicar de onde vêm os números e quais são os seus limites.</p>
     <div class="method">
       <div class="card wide" id="obsMunicipios">
+        <span class="badge-rev">⚠ Em revisão</span>
         <h3>Observações sobre os municípios</h3>
         <p><b>41 municípios do Paraná</b> receberam ao menos uma ação validada. Somando a ação realizada em Brasília (encontro nacional do PNCC), são 42 municípios no total.</p>
         <ul>
@@ -526,7 +531,7 @@ function render(){
   $('#kPart').textContent=fmtN(sum(rows,'participantes'));
   $('#kHoras').textContent=fmtN(sum(rows,'carga'));
   $('#kMun').textContent=fmtN(munSet.size);
-  $('#kMunH').textContent='Com ao menos uma ação presencial ou híbrida, incluindo as caravanas itinerantes.'+(fora?' Fora do estado: '+fora+' ação em Brasília.':'');
+  $('#kMunH').textContent='Com ao menos uma ação presencial ou híbrida, incluindo as caravanas itinerantes.'+(fora?' Fora do estado: '+fora+' ação em Brasília.':'')+' Número em revisão, sujeito a alteração.';
   $('#kSc').textContent=fmtN(nSc);
   const active=Object.entries(F).filter(([k,v])=>v).length;
   const txt='Mostrando '+rows.length+' de '+A.length+' ações'+(active?' (filtros ativos: '+active+')':'');
