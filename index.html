@@ -119,6 +119,8 @@ tr.detail td{background:var(--surface-2);font-size:13px}
 .munlist{columns:2 160px;column-gap:20px;font-size:14px;color:var(--ink-2);margin:8px 0 0;padding-left:18px}
 .srclink{display:inline-block;font-weight:700;border:1px solid var(--accent);border-radius:9px;padding:7px 12px;text-decoration:none}
 .srclink:hover{background:var(--accent-soft)}
+.chip-rev{border:2px dashed var(--warn);display:inline-flex;align-items:center;gap:6px}
+.badge-sm{font-size:10px;padding:2px 8px;margin:0}
 .callout{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 14px;font-size:14.5px}
 .callout b{color:var(--accent)}
 .callout .ic{font-size:20px;line-height:1.2}
@@ -156,7 +158,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
     <p class="lead">Este painel reúne as ações de formação, mobilização e comunicação registradas pelo Comitê de Cultura do Paraná e que passaram pela conferência de validação do programa. Use os filtros para chegar à ação que você procura e baixe os dados para sua própria análise.</p>
     <div class="chips">
       <span class="chip">Fonte: <b>planilha de conferência de 03/06/2026</b></span>
-      <span class="chip">Período das ações: <b id="chipPeriodo">—</b></span>
+      <span class="chip chip-rev">Período das ações: <b id="chipPeriodo">—</b> <span class="badge-rev badge-sm">⚠ Em revisão</span></span>
       <span class="chip">Situação: <b>todas as ações listadas estão validadas</b></span>
     </div>
     <nav class="jump" aria-label="Atalhos">
