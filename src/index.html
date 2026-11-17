@@ -77,6 +77,10 @@ tr.clk:hover td{background:var(--surface-2)}
 footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
 .err{background:#fde8e8;border:1px solid #c0392b;color:#7a1d14;border-radius:12px;padding:12px 16px;margin:14px 0}
 .hint{font-size:12.5px;color:var(--ink-3);margin:6px 2px 0}
+.embed body{background:transparent}
+.embed header,.embed footer{display:none}
+.embed .wrap{padding:0 2px}
+.embed .bar{margin-top:4px}
 </style>
 </head>
 <body>
@@ -147,6 +151,10 @@ const SIG2COD=Object.fromEntries(Object.entries(UF).map(([c,s])=>[s,c]));
 const $=s=>document.querySelector(s);
 const NS='http://www.w3.org/2000/svg';
 const PAINEL='https://painel-transparencia-comite-pr-rev0.vercel.app/';
+const EMBED=new URLSearchParams(location.search).has('embed');
+if(EMBED) document.documentElement.classList.add('embed');
+function sendHeight(){ if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'mapa-acoes-altura',h:document.documentElement.scrollHeight},'*'); }catch(e){} } }
+window.addEventListener('resize',()=>setTimeout(sendHeight,50));
 const fmt=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const fmtD=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
 const el=(t,a={},p)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;};
@@ -244,13 +252,13 @@ function select(c){sel=c; const g=cur.get(c);
   const ul=$('#selList'); ul.textContent='';
   (g?g.acoes:[]).slice().sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||'')).forEach(a=>{
     const li=document.createElement('li');
-    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target='_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.0B)'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
+    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target=EMBED?'_top':'_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.0B)'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
     const c2=document.createElement('div'); c2.textContent=a.nome; li.appendChild(c2);
     const c3=document.createElement('div'); c3.className='muted';
     c3.textContent=fmtD(a.inicio)+' · '+a.tipo+' · '+a.osc+' · '+(a.participantes!=null?fmt(a.participantes)+' participantes':'público não informado');
     if(a.municipios.length>1){const t=document.createElement('span'); t.className='tag'; t.textContent='caravana · '+a.municipios.length+' municípios'; c3.appendChild(t);}
     li.appendChild(c3); ul.appendChild(li);});
-  drawDots();
+  drawDots(); setTimeout(sendHeight,30);
 }
 
 function table(){const tb=$('#tbl tbody'); tb.textContent='';
@@ -270,6 +278,7 @@ function render(){
   $('#kRem').textContent=fmt(rs.length-mapped.length);
   drawMun(cur); drawDots(); legend(); table();
   if(sel && !cur.has(sel)) select(null); else if(sel) select(sel);
+  setTimeout(sendHeight,30);
 }
 function zoomBR(){focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); render();}
 function zoomUF(uf){focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
