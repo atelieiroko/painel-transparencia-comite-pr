@@ -63,6 +63,8 @@ h3{font-size:15px;margin:16px 0 6px}
 .list{max-height:420px;overflow:auto;margin:0;padding:0;list-style:none}
 .list li{border-top:1px solid var(--line);padding:9px 2px}
 .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--accent);font-weight:700}
+a.code{display:inline-block;text-decoration:underline;text-underline-offset:2px}
+a.code:hover{color:var(--ink)}
 .muted{color:var(--ink-3);font-size:12.5px}
 .tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:4px;color:var(--ink-2)}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -117,6 +119,7 @@ footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
       </div>
       <h3 id="selTitle">Selecione um município</h3>
       <p class="sub" id="selSub">Clique em um círculo no mapa ou em uma linha da tabela abaixo.</p>
+      <p class="muted" style="margin:0 0 6px">Clique no código de uma ação para abri-la no Painel de Transparência.</p>
       <ul class="list" id="selList"></ul>
     </aside>
   </div>
@@ -143,6 +146,7 @@ const UF={'11':'RO','12':'AC','13':'AM','14':'RR','15':'PA','16':'AP','17':'TO',
 const SIG2COD=Object.fromEntries(Object.entries(UF).map(([c,s])=>[s,c]));
 const $=s=>document.querySelector(s);
 const NS='http://www.w3.org/2000/svg';
+const PAINEL='https://painel-transparencia-comite-pr-rev0.vercel.app/';
 const fmt=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const fmtD=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
 const el=(t,a={},p)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;};
@@ -240,7 +244,7 @@ function select(c){sel=c; const g=cur.get(c);
   const ul=$('#selList'); ul.textContent='';
   (g?g.acoes:[]).slice().sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||'')).forEach(a=>{
     const li=document.createElement('li');
-    const c1=document.createElement('div'); c1.className='code'; c1.textContent=a.codigo; li.appendChild(c1);
+    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target='_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.0B)'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
     const c2=document.createElement('div'); c2.textContent=a.nome; li.appendChild(c2);
     const c3=document.createElement('div'); c3.className='muted';
     c3.textContent=fmtD(a.inicio)+' · '+a.tipo+' · '+a.osc+' · '+(a.participantes!=null?fmt(a.participantes)+' participantes':'público não informado');
