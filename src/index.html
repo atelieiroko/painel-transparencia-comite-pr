@@ -77,6 +77,23 @@ tr.clk:hover td{background:var(--surface-2)}
 footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
 .err{background:#fde8e8;border:1px solid #c0392b;color:#7a1d14;border-radius:12px;padding:12px 16px;margin:14px 0}
 .hint{font-size:12.5px;color:var(--ink-3);margin:6px 2px 0}
+.only-com{display:none}
+.mode-com .only-com{display:revert}
+.mode-com .only-acoes{display:none}
+#map .uf.sit{cursor:pointer}
+#map .uf.sit:hover{stroke:var(--accent);stroke-width:1.4}
+#map .uf.selc{stroke:var(--ink);stroke-width:2.2}
+#map .sede{fill:var(--accent);stroke:#fff;stroke-width:1.2;vector-effect:non-scaling-stroke;cursor:pointer}
+#map .parc{fill:#fff;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
+#map .sede:hover,#map .parc:hover{stroke:var(--ink)}
+#map .link{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:2 3;vector-effect:non-scaling-stroke;opacity:.6;pointer-events:none}
+.sw.sede{background:var(--accent);border-radius:2px;border:1px solid #fff;transform:rotate(45deg) scale(.8)}
+.sw.parc{border-radius:50%;background:#fff;border:2px solid var(--accent)}
+.sit-tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;border:1px solid var(--line)}
+dl.ficha{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;margin:8px 0}
+dl.ficha dt{color:var(--ink-3)}
+dl.ficha dd{margin:0}
+a.btnp{display:inline-block;margin-top:8px;font-weight:700;color:var(--accent)}
 .embed body{background:transparent}
 .embed header,.embed footer{display:none}
 .embed .wrap{padding:0 2px}
@@ -86,24 +103,27 @@ footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
 <body>
 <header class="wrap">
   <div class="eyebrow">Programa Nacional dos Comitês de Cultura · protótipo</div>
-  <h1>Mapa das ações dos Comitês de Cultura</h1>
-  <p class="lead">Onde as ações validadas aconteceram, município por município. Cada ação é ligada ao mapa oficial do IBGE pelo código do município. Clique em um estado com dados para aproximar e em um círculo para ver as ações daquele lugar.</p>
+  <h1>Mapa dos Comitês de Cultura</h1>
+  <p class="lead">Duas camadas. <b>Comitês</b>: os 27 Termos de Colaboração pelo Brasil, a situação de cada um, a sede da OSC celebrante e as OSCs parceiras. <b>Ações</b>: onde as ações validadas aconteceram, município por município. Tudo é ligado ao mapa oficial do IBGE pelo código do município.</p>
   <div class="chips">
     <span class="chip">Comitês com dados: <b id="cComites">—</b></span>
     <span class="chip">Malha territorial: <b>IBGE (API de malhas)</b></span>
     <span class="chip study">Codificação: <b>em estudo</b></span>
   </div>
-  <div class="note" role="note"><span>ⓘ</span><div><b>Protótipo.</b> Por enquanto só o Comitê de Cultura do Paraná tem dados carregados. Os demais estados aparecem em cinza até que seus comitês preencham a planilha com o mesmo cabeçalho. O código do município usa a Divisão Territorial Brasileira (DTB) do IBGE, que é um estudo de codificação e difere da codificação do PNCC, que define códigos apenas para os estados.</div></div>
+  <div class="note" role="note"><span>ⓘ</span><div><b>Protótipo.</b> A camada Comitês traz os dados dos Termos de Colaboração dos 27 comitês. Na camada Ações, por enquanto só o Comitê de Cultura do Paraná tem dados carregados; os demais estados aparecem em cinza até que seus comitês preencham a planilha com o mesmo cabeçalho. O código do município usa a Divisão Territorial Brasileira (DTB) do IBGE, que é um estudo de codificação e difere da codificação do PNCC, que define códigos apenas para os estados.</div></div>
 </header>
 
 <main class="wrap">
   <div class="bar" role="search">
-    <div class="f"><label for="fComite">Comitê</label><select id="fComite"></select></div>
-    <div class="f"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
-    <div class="f"><label for="fAno">Ano</label><select id="fAno"></select></div>
-    <div class="f"><label for="fMed">Tamanho do círculo</label><select id="fMed"><option value="n">Número de ações</option><option value="p">Participações</option></select></div>
+    <div class="f"><label for="fCamada">Camada</label><select id="fCamada"><option value="acoes">Ações</option><option value="comites">Comitês (Termos de Colaboração)</option></select></div>
+    <div class="f only-com"><label for="fReg">Região</label><select id="fReg"></select></div>
+    <div class="f only-com"><label for="fSit">Situação do TC</label><select id="fSit"></select></div>
+    <div class="f only-acoes"><label for="fComite">Comitê</label><select id="fComite"></select></div>
+    <div class="f only-acoes"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
+    <div class="f only-acoes"><label for="fAno">Ano</label><select id="fAno"></select></div>
+    <div class="f only-acoes"><label for="fMed">Tamanho do círculo</label><select id="fMed"><option value="n">Número de ações</option><option value="p">Participações</option></select></div>
     <button id="btnBR" type="button" class="primary" disabled>Ver o Brasil inteiro</button>
-    <button id="btnRoutes" type="button" aria-pressed="true">Rotas das caravanas: ligadas</button>
+    <button id="btnRoutes" type="button" class="only-acoes" aria-pressed="true">Rotas das caravanas: ligadas</button>
   </div>
   <div id="erro"></div>
 
@@ -112,23 +132,35 @@ footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
       <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Mapa do Brasil com as ações dos Comitês de Cultura por município"></svg>
       <div class="tip" id="tip"></div>
       <div class="legend" id="legend"></div>
-      <p class="hint">Arraste para mover e use a roda do mouse para aproximar. Clique em um estado com dados para aproximar nele e em “Ver o Brasil inteiro” para voltar.</p>
+      <p class="hint only-acoes">Arraste para mover e use a roda do mouse para aproximar. Clique em um estado com dados para aproximar nele e em “Ver o Brasil inteiro” para voltar.</p>
+      <p class="hint only-com">Clique em um estado, em uma sede ou em uma parceira para ver o comitê. Arraste para mover e use a roda do mouse para aproximar.</p>
     </div>
     <aside class="card" aria-live="polite">
       <div class="kpis">
-        <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l">ações no mapa</div></div>
-        <div class="kpi"><div class="v" id="kMun">—</div><div class="l">municípios com ação</div></div>
-        <div class="kpi"><div class="v" id="kUf">—</div><div class="l">estados com ação</div></div>
-        <div class="kpi"><div class="v" id="kRem">—</div><div class="l">ações remotas (fora do mapa)</div></div>
+        <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l" id="lAcoes">ações no mapa</div></div>
+        <div class="kpi"><div class="v" id="kMun">—</div><div class="l" id="lMun">municípios com ação</div></div>
+        <div class="kpi"><div class="v" id="kUf">—</div><div class="l" id="lUf">estados com ação</div></div>
+        <div class="kpi"><div class="v" id="kRem">—</div><div class="l" id="lRem">ações remotas (fora do mapa)</div></div>
       </div>
       <h3 id="selTitle">Selecione um município</h3>
       <p class="sub" id="selSub">Clique em um círculo no mapa ou em uma linha da tabela abaixo.</p>
-      <p class="muted" style="margin:0 0 6px">Clique no código de uma ação para abri-la no Painel de Transparência.</p>
+      <p class="muted only-acoes" style="margin:0 0 6px">Clique no código de uma ação para abri-la no Painel de Transparência.</p>
+      <div id="selCom"></div>
       <ul class="list" id="selList"></ul>
     </aside>
   </div>
 
-  <section class="card" style="margin-top:16px">
+  <section class="card only-com" style="margin-top:16px">
+    <h2>Comitês de Cultura pelo Brasil</h2>
+    <p class="sub">Um Termo de Colaboração por estado. Dados: planilha de informações dos TCs dos comitês. E-mails, telefones e endereços não são publicados; da sede aparece só o município.</p>
+    <div class="tablewrap">
+      <table id="tblC"><thead><tr>
+        <th data-k="seq" class="num">Nº</th><th data-k="uf">UF</th><th data-k="regiao">Região</th><th data-k="osc">OSC celebrante</th><th data-k="sit">Situação</th><th data-k="sede">Sede</th><th data-k="np" class="num">Parceiras</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section class="card only-acoes" style="margin-top:16px">
     <h2>Municípios com ações</h2>
     <p class="sub">Caravanas que passaram por vários municípios contam em cada um deles. Participações somam só as ações realizadas em um único município, como no painel de transparência.</p>
     <div class="tablewrap">
@@ -141,7 +173,7 @@ footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
 </main>
 
 <footer class="wrap">
-  Ações: planilhas de conferência dos Comitês de Cultura (Paraná: versão de 03/06/2026, 148 ações validadas). Municípios e estados: IBGE, API de malhas geográficas (qualidade mínima) e Divisão Territorial Brasileira. Malha baixada em <span id="geoData">—</span>.
+  Comitês: planilha de informações dos Termos de Colaboração dos comitês (27 TCs). Ações: planilhas de conferência dos Comitês de Cultura (Paraná: versão de 03/06/2026, 148 ações validadas). Municípios e estados: IBGE, API de malhas geográficas (qualidade mínima) e Divisão Territorial Brasileira. Malha baixada em <span id="geoData">—</span>.
 </footer>
 
 <script>
@@ -150,7 +182,15 @@ const UF={'11':'RO','12':'AC','13':'AM','14':'RR','15':'PA','16':'AP','17':'TO',
 const SIG2COD=Object.fromEntries(Object.entries(UF).map(([c,s])=>[s,c]));
 const $=s=>document.querySelector(s);
 const NS='http://www.w3.org/2000/svg';
-const PAINEL='https://painel-transparencia-comite-pr-rev0.vercel.app/';
+const QS=new URLSearchParams(location.search);
+const PAINEIS={'0b':'https://painel-transparencia-comite-pr-rev0.vercel.app/','0c':'https://painel-transparencia-comite-pr-rev0c.vercel.app/'};
+const VERSAO=PAINEIS[QS.get('painel')]?QS.get('painel'):'0b';
+const PAINEL=PAINEIS[VERSAO];
+const PAINEL_COM=PAINEIS['0c'];
+const SIT_COR={'ATIVO':'#e9b796','EM DISTRATO':'#efd58f','DISTRATADO':'#cbc3b8','NÃO CELEBRADO':'#f7f3ec'};
+const SIT_TXT={'ATIVO':'Ativo','EM DISTRATO':'Em distrato','DISTRATADO':'Distratado','NÃO CELEBRADO':'Não celebrado'};
+let C=[], modo=QS.get('camada')==='comites'?'comites':'acoes', selC=null;
+const FC={reg:'',sit:''};
 const EMBED=new URLSearchParams(location.search).has('embed');
 if(EMBED) document.documentElement.classList.add('embed');
 function sendHeight(){ if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'mapa-acoes-altura',h:document.documentElement.scrollHeight},'*'); }catch(e){} } }
@@ -184,6 +224,7 @@ async function load(){
   const get=async u=>{const r=await fetch(u); if(!r.ok) throw new Error(u+' ('+r.status+')'); return r.json();};
   const meta=await get('geo/meta.json');
   [A,UFS,CENT]=await Promise.all([get('data/acoes.json'),get('geo/ufs.json'),get('geo/centroides.json')]);
+  try{ C=await get('data/comites.json'); }catch(e){ C=[]; }
   for(const uf of meta.ufs) MUN[uf]=await get('geo/mun-'+uf+'.json');
   $('#geoData').textContent=new Date(meta.gerado).toLocaleDateString('pt-BR');
   A.forEach(a=>a.municipios.forEach(m=>NAMES[m.c]=m.n));
@@ -198,8 +239,18 @@ function agg(rs){const m=new Map();
     a.municipios.forEach(x=>{const g=m.get(x.c)||{c:x.c,nome:x.n,uf:UF[x.c.slice(0,2)],n:0,p:0,acoes:[]}; g.n++; if(solo) g.p+=a.participantes||0; g.acoes.push(a); m.set(x.c,g);});});
   return m;}
 
+function comRows(){return C.filter(c=>(!FC.reg||c.regiao===FC.reg)&&(!FC.sit||c.situacao===FC.sit));}
 function drawBase(){
   gLand.textContent=''; gUfLine.textContent='';
+  if(modo==='comites'){
+    const vis=new Set(comRows().map(c=>c.uf));
+    UFS.forEach(u=>{const sig=UF[u.c], c=C.find(x=>x.uf===sig);
+      const p=el('path',{d:pathOf(u.g),class:'uf'+(c?' sit':'')+(selC===sig?' selc':'')},gLand);
+      if(c){p.style.fill=vis.has(sig)?(SIT_COR[c.situacao]||'var(--land)'):'var(--land)'; p.addEventListener('click',()=>selectCom(sig));}
+      const t=el('title',{},p); t.textContent=sig+(c?' — '+(SIT_TXT[c.situacao]||c.situacao):'');
+      el('path',{d:pathOf(u.g),class:'ufline'},gUfLine);});
+    return;
+  }
   const withData=new Set(A.flatMap(a=>a.municipios.map(m=>m.c.slice(0,2))));
   UFS.forEach(u=>{const p=el('path',{d:pathOf(u.g),class:'uf'+(MUN[u.c]?' data':'')},gLand);
     const t=el('title',{},p); t.textContent=UF[u.c]+(withData.has(u.c)?' — com ações':' — sem dados ainda');
@@ -216,9 +267,26 @@ function drawMun(m){
     const t=el('title',{},p); t.textContent=g?(g.nome+' — '+fmt(g.n)+(g.n===1?' ação':' ações')):'';});
 }
 let cur=new Map();
+function drawCom(){
+  const unit=VB[2]/1000;
+  comRows().forEach(c=>{
+    const s=c.sede&&c.sede.c&&CENT[c.sede.c];
+    c.parceiras.forEach(p=>{const q=p.mun&&p.mun.c&&CENT[p.mun.c]; if(s&&q){const a=px(s),b=px(q); el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:'link'},gRoute);}});
+    c.parceiras.forEach(p=>{const q=p.mun&&p.mun.c&&CENT[p.mun.c]; if(!q) return; const [x,y]=px(q);
+      const d=el('circle',{cx:x,cy:y,r:4.2*unit,class:'parc'},gDot);
+      const t=el('title',{},d); t.textContent=p.osc+' — '+p.mun.n+'/'+c.uf+' (OSC parceira)';
+      d.addEventListener('click',ev=>{ev.stopPropagation(); selectCom(c.uf);});});
+    if(s){const [x,y]=px(s), r=5.5*unit;
+      const d=el('rect',{x:x-r,y:y-r,width:2*r,height:2*r,transform:'rotate(45 '+x+' '+y+')',class:'sede'},gDot);
+      const t=el('title',{},d); t.textContent=c.osc+' — sede em '+c.sede.n+'/'+c.uf+' (OSC celebrante)';
+      d.addEventListener('click',ev=>{ev.stopPropagation(); selectCom(c.uf);});
+      if(VB0 && VB[2]<VB0*0.55){const l=el('text',{x:x+r+2*unit,y:y+4*unit,class:'lbl'},gLbl); l.style.fontSize=(11*unit)+'px'; l.style.strokeWidth=(3*unit)+'px'; l.textContent=c.sede.n;}}
+  });
+}
 function drawDots(){
   gDot.textContent=''; gLbl.textContent=''; gRoute.textContent='';
   if(!VB) return;
+  if(modo==='comites'){ drawCom(); return; }
   const unit=VB[2]/1000;
   const max=Math.max(1,...[...cur.values()].map(g=>g[F.med]||0));
   if(showRoutes) rows().filter(a=>a.municipios.length>1).forEach(a=>{
@@ -240,6 +308,10 @@ function tip(e,g){const t=$('#tip'), box=svg.parentElement.getBoundingClientRect
 
 function legend(){const L=$('#legend'); L.innerHTML='';
   const add=(cls,txt,style)=>{const s=document.createElement('span'); const w=document.createElement('i'); w.className='sw '+cls; if(style) w.style.cssText=style; s.append(w,document.createTextNode(txt)); L.appendChild(s);};
+  if(modo==='comites'){
+    Object.keys(SIT_COR).forEach(k=>add('','TC '+SIT_TXT[k].toLowerCase(),'background:'+SIT_COR[k]));
+    add('sede','Sede da OSC celebrante'); add('parc','OSC parceira'); return;
+  }
   add('dot',F.med==='n'?'Círculo: número de ações no município':'Círculo: participações no município');
   if(showRoutes) add('route','Rota de caravana');
   add('','Estado sem dados ainda','background:var(--land)');
@@ -252,7 +324,7 @@ function select(c){sel=c; const g=cur.get(c);
   const ul=$('#selList'); ul.textContent='';
   (g?g.acoes:[]).slice().sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||'')).forEach(a=>{
     const li=document.createElement('li');
-    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target=EMBED?'_top':'_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.0B)'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
+    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target=EMBED?'_top':'_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.'+VERSAO.toUpperCase().replace('0','0')+')'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
     const c2=document.createElement('div'); c2.textContent=a.nome; li.appendChild(c2);
     const c3=document.createElement('div'); c3.className='muted';
     c3.textContent=fmtD(a.inicio)+' · '+a.tipo+' · '+a.osc+' · '+(a.participantes!=null?fmt(a.participantes)+' participantes':'público não informado');
@@ -261,6 +333,37 @@ function select(c){sel=c; const g=cur.get(c);
   drawDots(); setTimeout(sendHeight,30);
 }
 
+const dd=(dl,k,v)=>{const t=document.createElement('dt'); t.textContent=k; const d=document.createElement('dd'); d.textContent=(v===null||v===undefined||v==='')?'—':v; dl.append(t,d);};
+function selectCom(uf){selC=uf; const c=C.find(x=>x.uf===uf); const box=$('#selCom'); box.textContent='';
+  $('#selTitle').textContent=c?('Comitê de Cultura · '+c.estado+' ('+c.uf+')'):'Selecione um estado';
+  $('#selSub').textContent=c?('Região '+c.regiao+' · Termo de Colaboração nº '+(c.tc||'—')):'Clique em um estado, em uma sede ou em uma parceira no mapa, ou numa linha da tabela abaixo.';
+  $('#selList').textContent='';
+  if(c){
+    const tag=document.createElement('span'); tag.className='sit-tag'; tag.style.background=SIT_COR[c.situacao]||''; tag.textContent='TC '+(SIT_TXT[c.situacao]||c.situacao||'—'); box.appendChild(tag);
+    const dl=document.createElement('dl'); dl.className='ficha';
+    dd(dl,'OSC celebrante',c.osc); dd(dl,'CNPJ',c.cnpj); dd(dl,'Sede',c.sede?c.sede.n+'/'+c.uf:null);
+    dd(dl,'Representante legal',c.representante); dd(dl,'Proposta (Transferegov)',c.proposta); dd(dl,'Instrumento (Transferegov)',c.instrumento);
+    dd(dl,'Termo aditivo',c.aditivo);
+    box.appendChild(dl);
+    const h=document.createElement('h3'); h.textContent='OSCs parceiras ('+c.parceiras.length+')'; box.appendChild(h);
+    const ul=document.createElement('ul'); ul.className='list';
+    if(!c.parceiras.length){const li=document.createElement('li'); li.className='muted'; li.textContent=c.obs_parceiras.length?c.obs_parceiras.join('; '):'Sem informação na planilha.'; ul.appendChild(li);}
+    c.parceiras.forEach(p=>{const li=document.createElement('li'); const b=document.createElement('div'); b.textContent=p.osc; li.appendChild(b);
+      const m=document.createElement('div'); m.className='muted'; m.textContent=p.mun?(p.mun.n+(p.mun.c?' · código IBGE '+p.mun.c:'')+(p.mun.obs?' · '+p.mun.obs:'')):'Município não informado'; li.appendChild(m); ul.appendChild(li);});
+    box.appendChild(ul);
+    const a=document.createElement('a'); a.className='btnp'; a.href=PAINEL_COM+'#comite-'+c.uf; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='Ver no Painel de Transparência (Rev.0C) ↗'; box.appendChild(a);
+  }
+  drawBase();
+}
+let sortC='seq', dirC=1;
+function tableCom(){const tb=$('#tblC tbody'); tb.textContent='';
+  const val=(c,k)=>k==='sit'?(SIT_TXT[c.situacao]||''):k==='sede'?(c.sede?c.sede.n:''):k==='np'?c.parceiras.length:c[k];
+  comRows().slice().sort((a,b)=>{const x=val(a,sortC),y=val(b,sortC); return (typeof x==='number'?(x-y):String(x||'').localeCompare(String(y||''),'pt-BR'))*dirC;})
+  .forEach(c=>{const tr=document.createElement('tr'); tr.className='clk';
+    [c.seq,c.uf,c.regiao,c.osc||'—',SIT_TXT[c.situacao]||c.situacao,c.sede?c.sede.n:'—',c.parceiras.length].forEach((v,i)=>{const td=document.createElement('td'); td.textContent=v; if(i===0||i===6) td.className='num'; tr.appendChild(td);});
+    tr.addEventListener('click',()=>{selectCom(c.uf); window.scrollTo({top:svg.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});});
+    tb.appendChild(tr);});}
+document.querySelectorAll('#tblC th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortC===k) dirC*=-1; else {sortC=k; dirC=(k==='np')?-1:1;} tableCom();}));
 function table(){const tb=$('#tbl tbody'); tb.textContent='';
   [...cur.values()].sort((a,b)=>{const x=a[sortK],y=b[sortK]; return (typeof x==='number'?(x-y):String(x).localeCompare(String(y),'pt-BR'))*sortDir;})
   .forEach(g=>{const tr=document.createElement('tr'); tr.className='clk';
@@ -269,7 +372,21 @@ function table(){const tb=$('#tbl tbody'); tb.textContent='';
     tb.appendChild(tr);});}
 document.querySelectorAll('#tbl th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==='n'||k==='p')?-1:1;} table();}));
 
+function renderCom(){
+  const rs=comRows();
+  const mun=new Set(); rs.forEach(c=>{if(c.sede&&c.sede.c) mun.add(c.sede.c); c.parceiras.forEach(p=>{if(p.mun&&p.mun.c) mun.add(p.mun.c);});});
+  $('#kAcoes').textContent=fmt(rs.length); $('#lAcoes').textContent='comitês (TCs)';
+  $('#kMun').textContent=fmt(rs.filter(c=>c.situacao==='ATIVO').length); $('#lMun').textContent='com TC ativo';
+  $('#kUf').textContent=fmt(rs.reduce((s,c)=>s+c.parceiras.length,0)); $('#lUf').textContent='OSCs parceiras';
+  $('#kRem').textContent=fmt(mun.size); $('#lRem').textContent='municípios com sede ou parceira';
+  drawBase(); gMun.textContent=''; drawDots(); legend(); tableCom();
+  if(selC) selectCom(selC); else selectCom(null);
+}
+function setModo(m){modo=m; document.documentElement.classList.toggle('mode-com',m==='comites'); $('#fCamada').value=m;
+  if(m==='acoes'){ $('#lAcoes').textContent='ações no mapa'; $('#lMun').textContent='municípios com ação'; $('#lUf').textContent='estados com ação'; $('#lRem').textContent='ações remotas (fora do mapa)'; $('#selCom').textContent=''; drawBase(); select(null);}
+  zoomBR();}
 function render(){
+  if(modo==='comites'){ renderCom(); return; }
   const rs=rows(); cur=agg(rs);
   const mapped=rs.filter(a=>a.municipios.length);
   $('#kAcoes').textContent=fmt(mapped.length);
@@ -280,8 +397,9 @@ function render(){
   if(sel && !cur.has(sel)) select(null); else if(sel) select(sel);
   setTimeout(sendHeight,30);
 }
-function zoomBR(){focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); render();}
-function zoomUF(uf){focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
+let VB0=null;
+function zoomBR(){focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); VB0=VB[2]; render();}
+function zoomUF(uf){if(modo==='comites') return; focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
 
 // arrastar e aproximar
 let drag=null, moved=false;
@@ -298,6 +416,8 @@ svg.addEventListener('wheel',e=>{e.preventDefault(); const r=svg.getBoundingClie
 
 $('#btnBR').addEventListener('click',zoomBR);
 $('#btnRoutes').addEventListener('click',e=>{showRoutes=!showRoutes; e.currentTarget.textContent='Rotas das caravanas: '+(showRoutes?'ligadas':'desligadas'); e.currentTarget.setAttribute('aria-pressed',showRoutes); drawDots(); legend();});
+$('#fCamada').addEventListener('change',e=>setModo(e.target.value));
+[['#fReg','reg'],['#fSit','sit']].forEach(([s,k])=>$(s).addEventListener('change',e=>{FC[k]=e.target.value; render();}));
 [['#fComite','comite'],['#fTipo','tipo'],['#fAno','ano'],['#fMed','med']].forEach(([s,k])=>$(s).addEventListener('change',e=>{F[k]=e.target.value; render();}));
 
 load().then(()=>{
@@ -306,7 +426,11 @@ load().then(()=>{
   opts('#fComite',comites,'Todos',s=>s+' — Comitê de Cultura');
   opts('#fTipo',[...new Set(A.map(a=>a.tipo))].sort(),'Todas');
   opts('#fAno',[...new Set(A.map(a=>(a.inicio||'').slice(0,4)).filter(Boolean))].sort(),'Todos');
-  drawBase(); zoomBR();
+  opts('#fReg',[...new Set(C.map(c=>c.regiao))].sort(),'Todas');
+  opts('#fSit',Object.keys(SIT_TXT).filter(k=>C.some(c=>c.situacao===k)),'Todas',k=>SIT_TXT[k]);
+  if(!C.length){ $('#fCamada').disabled=true; modo='acoes'; }
+  const h=decodeURIComponent(location.hash.slice(1)); if(/^comite-[A-Z]{2}$/.test(h)){ modo='comites'; selC=h.slice(7); }
+  setModo(modo);
 }).catch(err=>{$('#erro').innerHTML=''; const d=document.createElement('div'); d.className='err'; d.textContent='Não foi possível carregar os dados do mapa: '+err.message; $('#erro').appendChild(d);});
 })();
 </script>

@@ -1,5 +1,5 @@
 // Build do Mapa das Ações dos Comitês de Cultura.
-// Roda na Vercel a cada publicação: junta os arquivos data/acoes-*.json e baixa
+// Roda na Vercel a cada publicação: junta os arquivos data/acoes-*.json e data/comites.json e baixa
 // as malhas oficiais do IBGE (API de malhas v3) só para os estados com ações.
 // Os municípios são ligados às ações pelo código DTB/IBGE de 7 dígitos.
 import { readFile, writeFile, mkdir, copyFile, readdir } from 'node:fs/promises';
@@ -60,6 +60,14 @@ for (const f of (await readdir('data')).filter(f => /^acoes-.*\.json$/.test(f)).
 }
 await writeFile(`${OUT}/data/acoes.json`, JSON.stringify(acoes));
 
+// 1b. Comitês (Termos de Colaboração): sede da OSC celebrante e OSCs parceiras
+let comites = [];
+try { comites = JSON.parse(await readFile('data/comites.json', 'utf-8')); } catch (e) { console.log('Sem data/comites.json'); }
+await writeFile(`${OUT}/data/comites.json`, JSON.stringify(comites));
+const codComites = new Set();
+comites.forEach(c => { if (c.sede && c.sede.c) codComites.add(c.sede.c); c.parceiras.forEach(p => { if (p.mun && p.mun.c) codComites.add(p.mun.c); }); });
+console.log(`Comitês: ${comites.length}, municípios de sede ou parceira: ${codComites.size}`);
+
 // 2. Estados (Brasil inteiro)
 const br = await get(`${BASE}/paises/BR?${GEO}&intrarregiao=UF`);
 const ufs = br.features.map(f => ({ c: f.properties.codarea, g: roundGeom(f.geometry) }));
@@ -69,8 +77,9 @@ console.log(`Estados: ${ufs.length}`);
 // 3. Municípios dos estados que têm ações (código UF = 2 primeiros dígitos do código DTB)
 const codes = new Set(acoes.flatMap(a => a.municipios.map(m => m.c)));
 const ufCodes = [...new Set([...codes].map(c => c.slice(0, 2)))].sort();
+const ufBaixar = [...new Set([...codes, ...codComites].map(c => c.slice(0, 2)))].sort();
 const centroides = {};
-for (const uf of ufCodes) {
+for (const uf of ufBaixar) {
   const fc = await get(`${BASE}/estados/${uf}?${GEO}&intrarregiao=municipio`);
   const mun = fc.features.map(f => {
     const g = roundGeom(f.geometry);
@@ -78,12 +87,13 @@ for (const uf of ufCodes) {
     centroides[f.properties.codarea] = c;
     return { c: f.properties.codarea, g, p: c };
   });
-  await writeFile(`${OUT}/geo/mun-${uf}.json`, JSON.stringify(mun));
+  if (ufCodes.includes(uf)) await writeFile(`${OUT}/geo/mun-${uf}.json`, JSON.stringify(mun));
   console.log(`UF ${uf}: ${mun.length} municípios`);
 }
-const faltando = [...codes].filter(c => !centroides[c]);
+const faltando = [...codes, ...codComites].filter(c => !centroides[c]);
 if (faltando.length) throw new Error('Códigos sem malha no IBGE: ' + faltando.join(', '));
-await writeFile(`${OUT}/geo/centroides.json`, JSON.stringify(centroides));
+const usados = Object.fromEntries([...codes, ...codComites].map(c => [c, centroides[c]]));
+await writeFile(`${OUT}/geo/centroides.json`, JSON.stringify(usados));
 await writeFile(`${OUT}/geo/meta.json`, JSON.stringify({ ufs: ufCodes, gerado: new Date().toISOString(), fonte: `${BASE} (qualidade mínima)` }));
 
 await copyFile('src/index.html', `${OUT}/index.html`);
