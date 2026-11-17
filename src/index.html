@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa das ações dos Comitês de Cultura — protótipo nacional</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f6f3ee; --surface:#fffdf9; --surface-2:#f0ebe3; --line:#e2dbcf;
+  --ink:#1d1a16; --ink-2:#55504a; --ink-3:#7a736a;
+  --accent:#9a3b17; --accent-soft:#f6e3d8; --warn:#9a6a00;
+  --land:#ece6dc; --land-line:#d6cdbf; --mun-line:#e4dccf;
+  --c1:#f3d9c9; --c2:#e7a985; --c3:#cf7044; --c4:#9a3b17;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header{padding:28px 0 18px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(24px,3.4vw,36px);line-height:1.12;margin:6px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--ink-2);max-width:820px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.chip b{color:var(--ink)}
+.chip.study{border:2px dashed var(--warn)}
+.note{display:flex;gap:10px;background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:12px;padding:11px 15px;margin:14px 0 0;font-size:14px}
+.note b{color:var(--accent)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:18px 0 12px}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+select,button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:7px 10px}
+button{cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:disabled{opacity:.45;cursor:default}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+@media (max-width:920px){.layout{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.mapcard{position:relative;padding:8px}
+#map{width:100%;height:auto;display:block;touch-action:none}
+#map .uf{fill:var(--land);stroke:var(--land-line);stroke-width:.6;vector-effect:non-scaling-stroke}
+#map .uf.data{cursor:pointer}
+#map .uf.data:hover{stroke:var(--accent);stroke-width:1.4}
+#map .mun{stroke:var(--mun-line);stroke-width:.4;vector-effect:non-scaling-stroke;fill:#f7f3ec}
+#map .mun.has{cursor:pointer}
+#map .ufline{fill:none;stroke:#bfb4a3;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
+#map .route{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;opacity:.8;pointer-events:none}
+#map .dot{fill:var(--accent);fill-opacity:.72;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}
+#map .dot:hover,#map .dot.sel{fill-opacity:1;stroke:var(--ink);stroke-width:2}
+#map .lbl{font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#fffdf9;stroke-width:3px;pointer-events:none;font-weight:600}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;padding:7px 10px;border-radius:8px;opacity:0;transition:opacity .12s;max-width:260px;z-index:3}
+.legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12.5px;color:var(--ink-2);padding:8px 10px 4px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--land-line)}
+.sw.dot{border-radius:50%;background:var(--accent);opacity:.75;border:1px solid #fff}
+.sw.route{width:22px;height:0;border:0;border-top:2px dashed var(--accent);border-radius:0;vertical-align:3px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.kpi .v{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.kpi .l{font-size:12.5px;color:var(--ink-2)}
+h2{font-size:18px;margin:0 0 4px}
+h3{font-size:15px;margin:16px 0 6px}
+.sub{color:var(--ink-3);font-size:13px;margin:0 0 10px}
+.list{max-height:420px;overflow:auto;margin:0;padding:0;list-style:none}
+.list li{border-top:1px solid var(--line);padding:9px 2px}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--accent);font-weight:700}
+.muted{color:var(--ink-3);font-size:12.5px}
+.tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:4px;color:var(--ink-2)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
+td.num,th.num{text-align:right}
+tr.clk{cursor:pointer}
+tr.clk:hover td{background:var(--surface-2)}
+.tablewrap{max-height:460px;overflow:auto}
+footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
+.err{background:#fde8e8;border:1px solid #c0392b;color:#7a1d14;border-radius:12px;padding:12px 16px;margin:14px 0}
+.hint{font-size:12.5px;color:var(--ink-3);margin:6px 2px 0}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div class="eyebrow">Programa Nacional dos Comitês de Cultura · protótipo</div>
+  <h1>Mapa das ações dos Comitês de Cultura</h1>
+  <p class="lead">Onde as ações validadas aconteceram, município por município. Cada ação é ligada ao mapa oficial do IBGE pelo código do município. Clique em um estado com dados para aproximar e em um círculo para ver as ações daquele lugar.</p>
+  <div class="chips">
+    <span class="chip">Comitês com dados: <b id="cComites">—</b></span>
+    <span class="chip">Malha territorial: <b>IBGE (API de malhas)</b></span>
+    <span class="chip study">Codificação: <b>em estudo</b></span>
+  </div>
+  <div class="note" role="note"><span>ⓘ</span><div><b>Protótipo.</b> Por enquanto só o Comitê de Cultura do Paraná tem dados carregados. Os demais estados aparecem em cinza até que seus comitês preencham a planilha com o mesmo cabeçalho. O código do município usa a Divisão Territorial Brasileira (DTB) do IBGE, que é um estudo de codificação e difere da codificação do PNCC, que define códigos apenas para os estados.</div></div>
+</header>
+
+<main class="wrap">
+  <div class="bar" role="search">
+    <div class="f"><label for="fComite">Comitê</label><select id="fComite"></select></div>
+    <div class="f"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
+    <div class="f"><label for="fAno">Ano</label><select id="fAno"></select></div>
+    <div class="f"><label for="fMed">Tamanho do círculo</label><select id="fMed"><option value="n">Número de ações</option><option value="p">Participações</option></select></div>
+    <button id="btnBR" type="button" class="primary" disabled>Ver o Brasil inteiro</button>
+    <button id="btnRoutes" type="button" aria-pressed="true">Rotas das caravanas: ligadas</button>
+  </div>
+  <div id="erro"></div>
+
+  <div class="layout">
+    <div class="card mapcard">
+      <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Mapa do Brasil com as ações dos Comitês de Cultura por município"></svg>
+      <div class="tip" id="tip"></div>
+      <div class="legend" id="legend"></div>
+      <p class="hint">Arraste para mover, use a roda do mouse ou os botões do navegador para aproximar. Clique em um estado com dados para aproximar nele.</p>
+    </div>
+    <aside class="card" aria-live="polite">
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l">ações no mapa</div></div>
+        <div class="kpi"><div class="v" id="kMun">—</div><div class="l">municípios com ação</div></div>
+        <div class="kpi"><div class="v" id="kUf">—</div><div class="l">estados com ação</div></div>
+        <div class="kpi"><div class="v" id="kRem">—</div><div class="l">ações remotas (fora do mapa)</div></div>
+      </div>
+      <h3 id="selTitle">Selecione um município</h3>
+      <p class="sub" id="selSub">Clique em um círculo no mapa ou em uma linha da tabela abaixo.</p>
+      <ul class="list" id="selList"></ul>
+    </aside>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Municípios com ações</h2>
+    <p class="sub">Caravanas que passaram por vários municípios contam em cada um deles. Participações somam só as ações realizadas em um único município, como no painel de transparência.</p>
+    <div class="tablewrap">
+      <table id="tbl"><thead><tr>
+        <th data-k="nome">Município</th><th data-k="uf">UF</th><th data-k="c">Código IBGE</th>
+        <th data-k="n" class="num">Ações</th><th data-k="p" class="num">Participações</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Ações: planilhas de conferência dos Comitês de Cultura (Paraná: versão de 03/06/2026, 148 ações validadas). Municípios e estados: IBGE, API de malhas geográficas (qualidade mínima) e Divisão Territorial Brasileira. Malha baixada em <span id="geoData">—</span>.
+</footer>
+
+<script>
+(function(){
+const UF={'11':'RO','12':'AC','13':'AM','14':'RR','15':'PA','16':'AP','17':'TO','21':'MA','22':'PI','23':'CE','24':'RN','25':'PB','26':'PE','27':'AL','28':'SE','29':'BA','31':'MG','32':'ES','33':'RJ','35':'SP','41':'PR','42':'SC','43':'RS','50':'MS','51':'MT','52':'GO','53':'DF'};
+const SIG2COD=Object.fromEntries(Object.entries(UF).map(([c,s])=>[s,c]));
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+const fmt=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
+const fmtD=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;};
+
+let A=[], UFS=[], MUN={}, CENT={}, NAMES={};
+const F={comite:'',tipo:'',ano:'',med:'n'};
+let focusUF=null, sel=null, showRoutes=true, sortK='n', sortDir=-1;
+
+// projeção equiretangular corrigida pela latitude média do Brasil
+const K=Math.cos(-14*Math.PI/180);
+const px=([lon,lat])=>[lon*K, -lat];
+let VB=null;
+function bboxOf(geoms){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  const walk=c=>{if(typeof c[0]==='number'){const[x,y]=px(c); if(x<x0)x0=x; if(y<y0)y0=y; if(x>x1)x1=x; if(y>y1)y1=y;} else c.forEach(walk);};
+  geoms.forEach(g=>walk(g.coordinates)); return [x0,y0,x1,y1];}
+function pathOf(g){const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates; let d='';
+  for(const p of polys) for(const r of p){ r.forEach((c,i)=>{const[x,y]=px(c); d+=(i?'L':'M')+x.toFixed(3)+','+y.toFixed(3);}); d+='Z'; } return d;}
+
+const svg=$('#map');
+const gLand=el('g',{},svg), gMun=el('g',{},svg), gUfLine=el('g',{},svg), gRoute=el('g',{},svg), gDot=el('g',{},svg), gLbl=el('g',{},svg);
+
+function setView(b,pad){const w=b[2]-b[0], h=b[3]-b[1]; const p=pad*Math.max(w,h);
+  VB=[b[0]-p,b[1]-p,w+2*p,h+2*p]; svg.setAttribute('viewBox',VB.join(' '));
+  const r=VB[2]/VB[3]; svg.style.aspectRatio=r>0.5?String(r):'0.5'; drawDots();}
+
+async function load(){
+  const get=async u=>{const r=await fetch(u); if(!r.ok) throw new Error(u+' ('+r.status+')'); return r.json();};
+  const meta=await get('geo/meta.json');
+  [A,UFS,CENT]=await Promise.all([get('data/acoes.json'),get('geo/ufs.json'),get('geo/centroides.json')]);
+  for(const uf of meta.ufs) MUN[uf]=await get('geo/mun-'+uf+'.json');
+  $('#geoData').textContent=new Date(meta.gerado).toLocaleDateString('pt-BR');
+  A.forEach(a=>a.municipios.forEach(m=>NAMES[m.c]=m.n));
+}
+
+function opts(id,vals,label,fmtv){const s=$(id); s.textContent=''; const o=document.createElement('option'); o.value=''; o.textContent=label; s.appendChild(o);
+  vals.forEach(v=>{const e=document.createElement('option'); e.value=v; e.textContent=fmtv?fmtv(v):v; s.appendChild(e);});}
+
+function rows(){return A.filter(a=>(!F.comite||a.comite===F.comite)&&(!F.tipo||a.tipo===F.tipo)&&(!F.ano||(a.inicio||'').startsWith(F.ano)));}
+function agg(rs){const m=new Map();
+  rs.forEach(a=>{const solo=a.municipios.length===1;
+    a.municipios.forEach(x=>{const g=m.get(x.c)||{c:x.c,nome:x.n,uf:UF[x.c.slice(0,2)],n:0,p:0,acoes:[]}; g.n++; if(solo) g.p+=a.participantes||0; g.acoes.push(a); m.set(x.c,g);});});
+  return m;}
+
+function drawBase(){
+  gLand.textContent=''; gUfLine.textContent='';
+  const withData=new Set(A.flatMap(a=>a.municipios.map(m=>m.c.slice(0,2))));
+  UFS.forEach(u=>{const p=el('path',{d:pathOf(u.g),class:'uf'+(MUN[u.c]?' data':'')},gLand);
+    const t=el('title',{},p); t.textContent=UF[u.c]+(withData.has(u.c)?' — com ações':' — sem dados ainda');
+    if(MUN[u.c]) p.addEventListener('click',()=>zoomUF(u.c));
+    el('path',{d:pathOf(u.g),class:'ufline'},gUfLine);});
+}
+function drawMun(m){
+  gMun.textContent='';
+  if(!focusUF||!MUN[focusUF]) return;
+  const max=Math.max(1,...[...m.values()].map(g=>g[F.med]));
+  MUN[focusUF].forEach(f=>{const g=m.get(f.c); const v=g?g[F.med]:0;
+    const p=el('path',{d:pathOf(f.g),class:'mun'+(g?' has':'')},gMun);
+    if(g){const q=v/max; p.style.fill=q>.66?'var(--c3)':q>.33?'var(--c2)':'var(--c1)'; p.addEventListener('click',()=>select(f.c));}
+    const t=el('title',{},p); t.textContent=(g?g.nome:'')+(g?' — '+fmt(g.n)+' ações':'');});
+}
+let cur=new Map();
+function drawDots(){
+  gDot.textContent=''; gLbl.textContent=''; gRoute.textContent='';
+  if(!VB) return;
+  const unit=VB[2]/1000;
+  const max=Math.max(1,...[...cur.values()].map(g=>g[F.med]||0));
+  if(showRoutes) rows().filter(a=>a.municipios.length>1).forEach(a=>{
+    const pts=a.municipios.map(m=>CENT[m.c]).filter(Boolean).map(px);
+    if(pts.length>1) el('polyline',{points:pts.map(p=>p.join(',')).join(' '),class:'route'},gRoute);});
+  [...cur.values()].sort((a,b)=>(b[F.med]||0)-(a[F.med]||0)).forEach(g=>{
+    const c=CENT[g.c]; if(!c) return; const [x,y]=px(c);
+    const r=(3+15*Math.sqrt((g[F.med]||0)/max))*unit;
+    const d=el('circle',{cx:x,cy:y,r:Math.max(r,2.5*unit),class:'dot'+(sel===g.c?' sel':'')},gDot);
+    d.addEventListener('mouseenter',e=>tip(e,g)); d.addEventListener('mousemove',e=>tip(e,g)); d.addEventListener('mouseleave',()=>$('#tip').style.opacity=0);
+    d.addEventListener('click',ev=>{ev.stopPropagation(); select(g.c);});
+    if(focusUF && (g[F.med]||0)/max>.2){const t=el('text',{x:x+r+2*unit,y:y+4*unit,class:'lbl'},gLbl); t.style.fontSize=(11*unit)+'px'; t.style.strokeWidth=(3*unit)+'px'; t.textContent=g.nome;}
+  });
+}
+function tip(e,g){const t=$('#tip'), box=svg.parentElement.getBoundingClientRect();
+  t.innerHTML=''; const b=document.createElement('b'); b.textContent=g.nome+' ('+g.uf+')'; t.appendChild(b);
+  t.appendChild(document.createElement('br')); t.appendChild(document.createTextNode(fmt(g.n)+(g.n===1?' ação':' ações')+' · '+fmt(g.p)+' participações'));
+  t.style.left=Math.min(e.clientX-box.left+12,box.width-200)+'px'; t.style.top=(e.clientY-box.top+12)+'px'; t.style.opacity=1;}
+
+function legend(){const L=$('#legend'); L.innerHTML='';
+  const add=(cls,txt,style)=>{const s=document.createElement('span'); const w=document.createElement('i'); w.className='sw '+cls; if(style) w.style.cssText=style; s.append(w,document.createTextNode(txt)); L.appendChild(s);};
+  add('dot',F.med==='n'?'Círculo: número de ações no município':'Círculo: participações no município');
+  if(showRoutes) add('route','Rota de caravana');
+  add('','Estado sem dados ainda','background:var(--land)');
+  if(focusUF){add('','Menos','background:var(--c1)'); add('','','background:var(--c2)'); add('','Mais ações','background:var(--c3)');}
+}
+
+function select(c){sel=c; const g=cur.get(c);
+  $('#selTitle').textContent=g?g.nome+' ('+g.uf+')':'Selecione um município';
+  $('#selSub').textContent=g?('Código IBGE '+c+' · '+fmt(g.n)+(g.n===1?' ação':' ações')+' · '+fmt(g.p)+' participações'):'Clique em um círculo no mapa ou em uma linha da tabela abaixo.';
+  const ul=$('#selList'); ul.textContent='';
+  (g?g.acoes:[]).slice().sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||'')).forEach(a=>{
+    const li=document.createElement('li');
+    const c1=document.createElement('div'); c1.className='code'; c1.textContent=a.codigo; li.appendChild(c1);
+    const c2=document.createElement('div'); c2.textContent=a.nome; li.appendChild(c2);
+    const c3=document.createElement('div'); c3.className='muted';
+    c3.textContent=fmtD(a.inicio)+' · '+a.tipo+' · '+a.osc+' · '+(a.participantes!=null?fmt(a.participantes)+' participantes':'público não informado');
+    if(a.municipios.length>1){const t=document.createElement('span'); t.className='tag'; t.textContent='caravana · '+a.municipios.length+' municípios'; c3.appendChild(t);}
+    li.appendChild(c3); ul.appendChild(li);});
+  drawDots();
+}
+
+function table(){const tb=$('#tbl tbody'); tb.textContent='';
+  [...cur.values()].sort((a,b)=>{const x=a[sortK],y=b[sortK]; return (typeof x==='number'?(x-y):String(x).localeCompare(String(y),'pt-BR'))*sortDir;})
+  .forEach(g=>{const tr=document.createElement('tr'); tr.className='clk';
+    [g.nome,g.uf,g.c,fmt(g.n),fmt(g.p)].forEach((v,i)=>{const td=document.createElement('td'); td.textContent=v; if(i>2) td.className='num'; tr.appendChild(td);});
+    tr.addEventListener('click',()=>{const uf=g.c.slice(0,2); if(focusUF!==uf && MUN[uf]) zoomUF(uf); select(g.c); window.scrollTo({top:svg.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});});
+    tb.appendChild(tr);});}
+document.querySelectorAll('#tbl th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==='n'||k==='p')?-1:1;} table();}));
+
+function render(){
+  const rs=rows(); cur=agg(rs);
+  const mapped=rs.filter(a=>a.municipios.length);
+  $('#kAcoes').textContent=fmt(mapped.length);
+  $('#kMun').textContent=fmt(cur.size);
+  $('#kUf').textContent=fmt(new Set([...cur.keys()].map(c=>c.slice(0,2))).size);
+  $('#kRem').textContent=fmt(rs.length-mapped.length);
+  drawMun(cur); drawDots(); legend(); table();
+  if(sel && !cur.has(sel)) select(null); else if(sel) select(sel);
+}
+function zoomBR(){focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); render();}
+function zoomUF(uf){focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
+
+// arrastar e aproximar
+let drag=null, moved=false;
+svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,vb:VB.slice(),id:e.pointerId}; moved=false;});
+svg.addEventListener('pointermove',e=>{if(!drag) return;
+  if(!moved){ if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<5) return; moved=true; svg.setPointerCapture(drag.id); }
+  const s=VB[2]/svg.clientWidth;
+  VB=[drag.vb[0]-(e.clientX-drag.x)*s, drag.vb[1]-(e.clientY-drag.y)*s, VB[2], VB[3]]; svg.setAttribute('viewBox',VB.join(' ')); $('#btnBR').disabled=false;});
+svg.addEventListener('pointerup',()=>{drag=null;});
+svg.addEventListener('click',e=>{if(moved){e.stopPropagation(); e.preventDefault(); moved=false;}},true);
+svg.addEventListener('wheel',e=>{e.preventDefault(); const r=svg.getBoundingClientRect(); const f=e.deltaY>0?1.15:1/1.15;
+  const mx=VB[0]+(e.clientX-r.left)/r.width*VB[2], my=VB[1]+(e.clientY-r.top)/r.height*VB[3];
+  VB=[mx-(mx-VB[0])*f, my-(my-VB[1])*f, VB[2]*f, VB[3]*f]; svg.setAttribute('viewBox',VB.join(' ')); drawDots(); $('#btnBR').disabled=false;},{passive:false});
+
+$('#btnBR').addEventListener('click',zoomBR);
+$('#btnRoutes').addEventListener('click',e=>{showRoutes=!showRoutes; e.currentTarget.textContent='Rotas das caravanas: '+(showRoutes?'ligadas':'desligadas'); e.currentTarget.setAttribute('aria-pressed',showRoutes); drawDots(); legend();});
+[['#fComite','comite'],['#fTipo','tipo'],['#fAno','ano'],['#fMed','med']].forEach(([s,k])=>$(s).addEventListener('change',e=>{F[k]=e.target.value; render();}));
+
+load().then(()=>{
+  const comites=[...new Set(A.map(a=>a.comite))].sort();
+  $('#cComites').textContent=comites.join(', ');
+  opts('#fComite',comites,'Todos',s=>s+' — Comitê de Cultura');
+  opts('#fTipo',[...new Set(A.map(a=>a.tipo))].sort(),'Todas');
+  opts('#fAno',[...new Set(A.map(a=>(a.inicio||'').slice(0,4)).filter(Boolean))].sort(),'Todos');
+  drawBase(); zoomBR();
+}).catch(err=>{$('#erro').innerHTML=''; const d=document.createElement('div'); d.className='err'; d.textContent='Não foi possível carregar os dados do mapa: '+err.message; $('#erro').appendChild(d);});
+})();
+</script>
+</body>
+</html>
