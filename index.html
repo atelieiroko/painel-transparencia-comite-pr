@@ -145,9 +145,10 @@ details.faq summary{font-weight:600;cursor:pointer}
 details.faq p{color:var(--ink-2);margin:8px 0 2px}
 footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--line);margin-top:36px}
 .empty{color:var(--ink-3);font-size:14px;padding:10px 0}
-.mapembed{padding:10px}
-#mapaFrame iframe{display:block;width:100%;height:1250px;border:0;border-radius:12px;background:transparent}
-#mapaFrame .mapfallback{background:var(--surface-2);border-radius:12px;padding:18px;color:var(--ink-2);font-size:14px}
+.mapcta{display:flex;justify-content:center;margin:26px 0 38px}
+.mapbtn{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;font-weight:800;font-size:19px;letter-spacing:.01em;text-decoration:none;padding:15px 34px;border-radius:999px;box-shadow:0 6px 18px rgba(154,59,23,.25);transition:transform .12s,box-shadow .12s}
+.mapbtn:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(154,59,23,.32)}
+.mapbtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:.01em;white-space:nowrap;color:var(--ink)}
 td .code{font-size:11.5px;color:var(--ink-2)}
 .codebox{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:0 0 12px}
@@ -174,7 +175,7 @@ td .code{font-size:11.5px;color:var(--ink-2)}
       <span class="chip chip-rev">Codificação: <b>cada ação e cada documento têm um código único</b> <span class="badge-rev badge-sm">Em estudo</span></span>
     </div>
     <nav class="jump" aria-label="Atalhos">
-      <a href="#resumo">Resumo</a><a href="#quando">Quando</a><a href="#onde">Onde</a><a href="#mapa">Mapa</a><a href="#quem">Quem executou</a><a href="#publicos">Para quem</a><a href="#validacao">Validação</a><a href="#codigo">Código das ações</a><a href="#acoes">Lista de ações</a><a href="#obsMunicipios">Municípios</a><a href="#metodologia">Como ler os dados</a><a href="#faq">Perguntas frequentes</a>
+      <a href="#resumo">Resumo</a><a href="#quando">Quando</a><a href="#onde">Onde</a><a href="#quem">Quem executou</a><a href="#publicos">Para quem</a><a href="#validacao">Validação</a><a href="#codigo">Código das ações</a><a href="#acoes">Lista de ações</a><a href="#obsMunicipios">Municípios</a><a href="#metodologia">Como ler os dados</a><a href="#faq">Perguntas frequentes</a>
     </nav>
   </div>
 </header>
@@ -230,14 +231,9 @@ td .code{font-size:11.5px;color:var(--ink-2)}
     </div>
   </section>
 
-  <section id="mapa">
-    <h2>Mapa das ações</h2>
-    <p class="sub">As ações validadas no mapa oficial do IBGE, município por município. Clique no Paraná para aproximar, em um círculo para ver as ações daquele lugar e no código de uma ação para abri-la na lista abaixo. O mapa tem filtros próprios, que não acompanham os filtros do topo do painel.</p>
-    <div class="card wide mapembed">
-      <div id="mapaFrame"></div>
-      <p class="hint" style="margin:8px 4px 2px"><a class="srclink" href="https://mapa-acoes-comites-cultura.vercel.app" target="_blank" rel="noopener noreferrer">Abrir o mapa em página própria ↗</a></p>
-    </div>
-  </section>
+  <div class="mapcta" id="mapa">
+    <a class="mapbtn" href="https://mapa-acoes-comites-cultura.vercel.app" target="_blank" rel="noopener noreferrer">Veja no mapa <span aria-hidden="true">↗</span></a>
+  </div>
 
   <section id="quem">
     <h2>O que foi feito e quem executou</h2>
@@ -678,21 +674,6 @@ function openFromHash(){
 }
 window.addEventListener('hashchange',openFromHash);
 openFromHash();
-// Mapa embutido: só no endereço público do painel (o mapa autoriza ser exibido apenas ali)
-(function(){
-  const MAPA='https://mapa-acoes-comites-cultura.vercel.app';
-  const box=document.querySelector('#mapaFrame'); if(!box) return;
-  if(location.hostname==='painel-transparencia-comite-pr-rev0.vercel.app'){
-    const f=document.createElement('iframe'); f.src=MAPA+'/?embed=1'; f.title='Mapa das ações dos Comitês de Cultura'; f.loading='lazy';
-    box.appendChild(f);
-    window.addEventListener('message',e=>{ if(e.origin!==MAPA||!e.data||e.data.type!=='mapa-acoes-altura') return;
-      const hh=Math.max(600,Math.min(4000,Number(e.data.h)||0)); f.style.height=(hh+8)+'px'; });
-  } else {
-    const d=document.createElement('div'); d.className='mapfallback';
-    d.textContent='Nesta visualização o mapa não pode ser exibido dentro do painel. Use o link abaixo para abri-lo em página própria.';
-    box.appendChild(d);
-  }
-})();
 })();
 </script>
 </body>
