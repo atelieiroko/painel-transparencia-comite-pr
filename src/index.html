@@ -106,7 +106,7 @@ footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
       <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Mapa do Brasil com as ações dos Comitês de Cultura por município"></svg>
       <div class="tip" id="tip"></div>
       <div class="legend" id="legend"></div>
-      <p class="hint">Arraste para mover, use a roda do mouse ou os botões do navegador para aproximar. Clique em um estado com dados para aproximar nele.</p>
+      <p class="hint">Arraste para mover e use a roda do mouse para aproximar. Clique em um estado com dados para aproximar nele e em “Ver o Brasil inteiro” para voltar.</p>
     </div>
     <aside class="card" aria-live="polite">
       <div class="kpis">
@@ -201,7 +201,7 @@ function drawMun(m){
   MUN[focusUF].forEach(f=>{const g=m.get(f.c); const v=g?g[F.med]:0;
     const p=el('path',{d:pathOf(f.g),class:'mun'+(g?' has':'')},gMun);
     if(g){const q=v/max; p.style.fill=q>.66?'var(--c3)':q>.33?'var(--c2)':'var(--c1)'; p.addEventListener('click',()=>select(f.c));}
-    const t=el('title',{},p); t.textContent=(g?g.nome:'')+(g?' — '+fmt(g.n)+' ações':'');});
+    const t=el('title',{},p); t.textContent=g?(g.nome+' — '+fmt(g.n)+(g.n===1?' ação':' ações')):'';});
 }
 let cur=new Map();
 function drawDots(){
