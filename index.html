@@ -380,7 +380,7 @@ td .code{font-size:11.5px;color:var(--ink-2)}
     <details class="faq"><summary>Como confiro se uma ação aconteceu?</summary><p>Na lista de ações, clique em “▸ Abrir” na linha da atividade. Em “Comprovação da atividade” estão os links das fotos, da lista de presença e das publicações de divulgação, cada um em seu campo. Fotos e listas abrem na cópia de segurança do Comitê, com o arquivo nomeado pelo código do documento.</p></details>
     <details class="faq"><summary>O que significa “Validada após ajuste”?</summary><p>Que a conferência pediu correções ou novos comprovantes (por exemplo, retificar o número de participantes ou apresentar lista de presença) e a ação foi aprovada depois do ajuste. É um sinal de que o controle funcionou, não de irregularidade.</p></details>
     <details class="faq"><summary>Posso usar estes dados em uma pesquisa ou reportagem?</summary><p>Sim. Use o botão “Baixar dados filtrados (CSV)” (ou “Copiar dados” e cole numa planilha) e cite como fonte: Comitê de Cultura do Paraná / Programa Nacional dos Comitês de Cultura, planilha de conferência de validação, versão de 03/06/2026.</p></details>
-    <details class="faq"><summary>O que é o código que aparece em cada ação?</summary><p>É um identificador único, proposto em estudo de codificação do Comitê e ainda não adotado como padrão oficial do PNCC. Ele permite localizar a ação e cada um dos seus documentos de comprovação sem depender do nome do arquivo ou da grafia do município. O código não muda se a ação for corrigida depois. Veja a seção “Como ler o código de cada ação”.</p></details>
+    <details class="faq"><summary>O que é o código que aparece em cada ação?</summary><p>É um identificador único, proposto em estudo de codificação do Comitê e ainda não adotado como padrão oficial do PNCC. Ele permite localizar a ação e cada um dos seus documentos de comprovação sem depender do nome do arquivo ou da grafia do município. O código não muda se a ação for corrigida depois. Veja a seção “Como ler o código de cada ação”. Para abrir uma ação diretamente, use o endereço do painel seguido de # e o código (por exemplo, #PR-A0001-FOR-4106902-202403).</p></details>
     <details class="faq"><summary>Por que há uma ação em Brasília?</summary><p>Foi a participação da Rede de Comunicadores Populares no encontro nacional do PNCC, em Brasília. A ação conta no total de ações e participações, mas não na contagem de municípios do Paraná.</p></details>
   </section>
 </main>
@@ -656,6 +656,16 @@ $('#csv').addEventListener('click',async e=>{
 
 let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>colChart(filtered()),150);});
 render();
+// Link direto para uma ação: endereço do painel + #código (ex.: #PR-A0001-FOR-4106902-202403)
+function openFromHash(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  if(!/^[A-Z]{2}-A\d{4}-[A-Z]{3}-\d{7}-\d{6}$/.test(h)) return;
+  const a=A.find(x=>x.codigo===h); if(!a) return;
+  Object.keys(F).forEach(k=>F[k]=''); F.q=h; syncSelects(); page=0; open.add(a.id); render();
+  setTimeout(()=>{const t=document.querySelector('#acoes'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'});},60);
+}
+window.addEventListener('hashchange',openFromHash);
+openFromHash();
 })();
 </script>
 </body>
