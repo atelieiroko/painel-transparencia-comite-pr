@@ -133,6 +133,18 @@ tr.detail td{background:var(--surface-2);font-size:13px}
 .tag.wait{color:var(--warn);border-style:dashed}
 .ptag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .ptag.adt{background:var(--warn);color:#fff}
+.somat{margin-top:16px}
+.somat-t{width:100%;border-collapse:collapse;font-size:14px}
+.somat-t th,.somat-t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.somat-t th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.somat-t .num{text-align:right;font-variant-numeric:tabular-nums}
+.somat-t tbody tr{cursor:pointer}
+.somat-t tbody tr:hover td{background:var(--surface-2)}
+.somat-t tr.sum td{font-weight:700;border-top:2px solid var(--ink-3)}
+.somat-t tr.tot td{font-weight:800;background:var(--surface-2)}
+.somat-t tr.cur td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+.somat-t .wait{font-size:11px;font-weight:700;color:var(--warn);margin-left:6px;white-space:nowrap}
+.hint{font-size:12.5px;color:var(--ink-3);margin:8px 2px 0}
 .callout{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 14px;font-size:14.5px}
 .callout b{color:var(--accent)}
 .callout .ic{font-size:20px;line-height:1.2}
@@ -174,11 +186,11 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
       <span class="chip">Situação: <b id="chipSit">Ano I e II validados · Aditivo aguardando validação</b></span>
     </div>
     <div class="tabs" role="group" aria-label="Período">
-      <button type="button" data-per="anos" aria-pressed="true">Ano I e II (validadas)</button>
-      <button type="button" data-per="Ano 1" aria-pressed="false">Ano 1 · 2024</button>
-      <button type="button" data-per="Ano 2" aria-pressed="false">Ano 2 · 2025–2026</button>
+      <button type="button" data-per="Ano I" aria-pressed="false">Ano I · 2024</button>
+      <button type="button" data-per="Ano II" aria-pressed="false">Ano II · 2025–2026</button>
+      <button type="button" data-per="anos" aria-pressed="true">Ano I + Ano II · validadas</button>
       <button type="button" data-per="Aditivo" class="tab-adt" aria-pressed="false">Aditivo 2026 · aguardando validação</button>
-      <button type="button" data-per="todas" aria-pressed="false">Tudo</button>
+      <button type="button" data-per="total" aria-pressed="false">Total</button>
     </div>
     <p class="autoinfo">🔄 Atualização automática do aditivo: <b>todo dia às 22h30</b> (horário de Brasília). Última verificação: <b id="autoLast">—</b>.</p>
     <nav class="jump" aria-label="Atalhos">
@@ -194,7 +206,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
       <div class="f"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
       <div class="f"><label for="fOsc">OSC executora</label><select id="fOsc"></select></div>
       <div class="f"><label for="fMun">Município</label><select id="fMun"></select></div>
-      <div class="f"><label for="fAno">Ano</label><select id="fAno"></select></div>
+      <div class="f"><label for="fAno">Período</label><select id="fAno"></select></div>
       <div class="f"><label for="fFmt">Formato</label><select id="fFmt"></select></div>
       <div class="f"><label for="fVal">Validação</label><select id="fVal"></select></div>
       <button id="clear" type="button">Limpar filtros</button>
@@ -207,7 +219,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
   <section id="resumo">
     <h2>Resumo</h2>
     <p class="sub">Os números abaixo respondem aos filtros escolhidos. Sem filtros, mostram o total do Comitê.</p>
-    <div id="kpiValid"><p class="sub" style="margin:0 0 10px"><b>Ações validadas (Ano I e II)</b></p>
+    <div id="kpiValid"><p class="sub" style="margin:0 0 10px"><b id="kpiTitle">Ações validadas · Ano I + Ano II</b></p>
     <div class="kpis">
       <div class="kpi"><div class="v" id="kTotal">—</div><div class="l">total de ações</div><div class="h" id="kTotalH">Ações validadas + ações socioculturais associadas.</div></div>
       <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l">ações validadas</div><div class="h">Atividades de formação, mobilização e comunicação registradas e aprovadas na conferência.</div></div>
@@ -228,6 +240,12 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
         <div class="kpi"><div class="v" id="aHoras">—</div><div class="l">horas de atividade</div></div>
         <div class="kpi"><div class="v" id="aMun">—</div><div class="l">municípios do Paraná</div><div class="h" id="aMunH"></div></div>
       </div>
+    </div>
+    <div class="card wide somat" id="somat">
+      <h3>Ano I, Ano II e somatória</h3>
+      <p class="q">Os mesmos números lado a lado. A linha <b>Ano I + Ano II</b> soma as ações validadas dos dois anos; o <b>Total</b> acrescenta o Aditivo, que ainda aguarda validação. Respeita os outros filtros escolhidos. Clique em uma linha para ver aquele período no painel.</p>
+      <div class="tablewrap"><table class="somat-t"><thead><tr><th>Período</th><th class="num">Total de ações</th><th class="num">Ações</th><th class="num">Com ação sociocultural</th><th class="num">Participações</th><th class="num">Horas</th><th class="num">Municípios do PR</th></tr></thead><tbody id="somatBody"></tbody></table></div>
+      <p class="hint" id="somatNota"></p>
     </div>
   </section>
 
@@ -340,6 +358,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
         <h3>De onde vêm os dados</h3>
         <p>Os registros vêm do formulário de prestação de contas das ações do Comitê de Cultura do Paraná, consolidado na planilha de conferência de validação (aba “Ações ajustadas”, versão de 03/06/2026). Cada linha é uma ação registrada por uma OSC da rede e conferida pela equipe de validação do programa. Só entram no painel as ações com situação “Validada” ou “Validada após ajuste”.</p>
         <p><b>Aditivo 2026:</b> as ações do Termo Aditivo nº 21/2026 vêm da planilha de prestação de contas preenchida pelas OSCs, espelhada numa planilha viva que se atualiza 4 vezes por dia. O painel verifica essa planilha todos os dias às 22h30 (horário de Brasília). Essas ações aparecem marcadas como “aguardando validação” e não entram nos totais validados até passarem pela conferência.</p>
+        <p><b>Fotos:</b> os links de fotos abrem as cópias de segurança codificadas de cada ação (ex.: <code>PR-A0001-FOR-4106902-202403_FOT001</code>), guardadas na pasta de backup da prestação de contas. A codificação ainda é um estudo e pode mudar. Cada ação tem o seu código, visível ao abrir a ação; um endereço terminado em <code>#código</code> abre a ação direto.</p>
         <p><span class="badge-rev">⚠ Dados sensíveis – em revisão</span></p>
         <p>Cada ação traz os links de comprovação registrados (fotos, lista de presença e publicações de divulgação), que abrem no Google Drive ou na rede social de origem. Os e-mails de quem preencheu o formulário e os comentários internos da conferência não são publicados.</p>
       </div>
@@ -400,8 +419,11 @@ const REMOTA='Remota (sem município)';
 const munsOf = a => a.municipios.length ? a.municipios : [REMOTA];
 
 const F={q:'',tipo:'',osc:'',mun:'',ano:'',fmt:'',val:''};
+const PERS=[['Ano I','Ano I · 2024'],['Ano II','Ano II · 2025–2026'],['anos','Ano I + Ano II · validadas'],['Aditivo','Aditivo 2026 · aguardando validação'],['total','Total (Ano I + Ano II + Aditivo)']];
 let PERIODO='anos';
-const inPer=a=>PERIODO==='todas'?true:PERIODO==='anos'?a.bloco!=='Aditivo':a.periodo===PERIODO;
+const perMatch=(a,p)=>p==='total'?true:p==='anos'?a.bloco!=='Aditivo':a.periodo===p;
+const inPer=a=>perMatch(a,PERIODO);
+function setPer(p){PERIODO=p; document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.per===p)); $('#fAno').value=p; page=0; render();}
 const FIELD={tipo:'tipo',osc:'osc',mun:'municipio',fmt:'formato',val:'status'};
 
 function opts(sel, values, label){
@@ -413,7 +435,7 @@ const uniq=(k)=>[...new Set(A.map(a=>a[k]).filter(Boolean))];
 opts('#fTipo',uniq('tipo').sort(),'Todas');
 opts('#fOsc',uniq('osc').sort(),'Todas');
 opts('#fMun',[...new Set(A.flatMap(munsOf))].sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todos');
-opts('#fAno',[...new Set(A.map(a=>a.inicio&&a.inicio.slice(0,4)).filter(Boolean))].sort(),'Todos');
+{const s=$('#fAno'); s.textContent=''; PERS.forEach(([v,l])=>{const o=document.createElement('option'); o.value=v; o.textContent=l; s.appendChild(o);});}
 opts('#fFmt',uniq('formato').sort(),'Todos');
 opts('#fVal',uniq('status').sort(),'Todas');
 const dates=A.map(a=>a.inicio).filter(Boolean).sort();
@@ -422,14 +444,13 @@ $('#chipPeriodo').textContent=per(dates[0])+' a '+per(dates[dates.length-1]);
 $('#gerado').textContent=new Date().toLocaleDateString('pt-BR');
 
 const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
-function filtered(except){
-  const q=norm(F.q);
+function filtered(except,per){
+  const q=norm(F.q); const P=per||PERIODO;
   return A.filter(a=>{
-    if(!inPer(a)) return false;
+    if(!perMatch(a,P)) return false;
     if(q && !norm([a.nome,a.local,a.parceiros,a.municipios.join(' '),a.osc,a.osc_nome,a.gpte.join(' ')].join(' ')).includes(q)) return false;
     for(const k of ['tipo','osc','fmt','val']){ if(k!==except && F[k] && a[FIELD[k]]!==F[k]) return false; }
     if(except!=='mun' && F.mun && !munsOf(a).includes(F.mun)) return false;
-    if(except!=='ano' && F.ano && !(a.inicio||'').startsWith(F.ano)) return false;
     return true;
   });
 }
@@ -465,7 +486,7 @@ function bars(el, data, opt){
     box.appendChild(r);
   });
 }
-function syncSelects(){ $('#fTipo').value=F.tipo; $('#fOsc').value=F.osc; $('#fMun').value=F.mun; $('#fAno').value=F.ano; $('#fFmt').value=F.fmt; $('#fVal').value=F.val; $('#fq').value=F.q; }
+function syncSelects(){ $('#fTipo').value=F.tipo; $('#fOsc').value=F.osc; $('#fMun').value=F.mun; $('#fAno').value=PERIODO; $('#fFmt').value=F.fmt; $('#fVal').value=F.val; $('#fq').value=F.q; }
 
 let showAllMun=false;
 $('#moreMun').addEventListener('click',()=>{showAllMun=!showAllMun; render();});
@@ -552,7 +573,8 @@ function table(rows){
       item('Ação sociocultural',a.sociocultural==='Sim'?('Sim'+(a.linguagens.length?' — '+a.linguagens.join(', '):'')):(a.sociocultural||'—'));
       const ap=[a.diligencia?'diligência':null,a.ressalva?'ressalva':null].filter(Boolean);
       item('Apontamentos da conferência',a.bloco==='Aditivo'?'Ainda não conferida':(ap.length?'Recebeu '+ap.join(' e '):'Nenhum registrado'));
-      item('Etapa do termo',a.bloco==='Aditivo'?'Aditivo 2026 (Termo Aditivo nº 21/2026)':a.periodo+' (Ano I e II)');
+      if(a.codigo) item('Código da ação',a.codigo);
+      item('Etapa do termo',a.bloco==='Aditivo'?'Aditivo 2026 (Termo Aditivo nº 21/2026)':a.periodo+' (Termo de Colaboração)');
       if(a.eixo) item('Eixo da formação',a.eixo);
       if(a.temas) item('Temas',a.temas.replace(/;,/g,';'));
       if(a.evento) item('Evento ou projeto maior',a.evento);
@@ -583,22 +605,41 @@ document.querySelectorAll('#tbl th[data-k]').forEach(th=>th.addEventListener('cl
 $('#prev').addEventListener('click',()=>{page--; render();});
 $('#next').addEventListener('click',()=>{page++; render();});
 
+function somaDe(rs){
+  const FA=new Set(META_ADT.fora_uf||[]);
+  const sc=rs.filter(a=>a.sociocultural==='Sim').length;
+  const mun=new Set(rs.flatMap(a=>a.municipios).filter(m=>m!=='Brasília'&&!FA.has(m)));
+  return {n:rs.length, sc, tot:rs.length+sc, p:sum(rs,'participantes'), h:sum(rs,'carga'), m:mun.size};
+}
+function somatoria(){
+  const tb=$('#somatBody'); tb.textContent='';
+  const linhas=[['Ano I','Ano I · 2024',''],['Ano II','Ano II · 2025–2026',''],['anos','Ano I + Ano II','sum'],['Aditivo','Aditivo 2026','adt'],['total','Total','tot']];
+  linhas.forEach(([p,l,cls])=>{
+    const s=somaDe(filtered(null,p)); const tr=document.createElement('tr');
+    tr.className=(cls==='adt'?'':cls)+(PERIODO===p?' cur':''); tr.tabIndex=0; tr.title='Ver '+l+' no painel';
+    const td0=document.createElement('td'); td0.textContent=l;
+    if(p==='Aditivo'||p==='total'){const w=document.createElement('span'); w.className='wait'; w.textContent=p==='Aditivo'?'⚠ aguardando validação':'⚠ inclui o Aditivo'; td0.appendChild(w);}
+    tr.appendChild(td0);
+    [s.tot,s.n,s.sc,s.p,s.h,s.m].forEach(v=>{const td=document.createElement('td'); td.className='num'; td.textContent=fmtN(v); tr.appendChild(td);});
+    tr.addEventListener('click',()=>setPer(p)); tr.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); setPer(p);}});
+    tb.appendChild(tr);});
+  $('#somatNota').textContent='Municípios: cada município conta uma vez em cada linha; quem recebeu ações nos dois anos conta uma vez em “Ano I + Ano II”, por isso essa linha não é a soma simples das duas de cima. Fora do Paraná (Brasília'+((META_ADT.fora_uf||[]).length?', '+META_ADT.fora_uf.join(', '):'')+') não entra na contagem.';
+}
 function render(){
   let rows=filtered();
-  const munSet=new Set(rows.flatMap(a=>a.municipios).filter(m=>m!=='Brasília'));
-  const fora=rows.filter(a=>a.municipios.includes('Brasília')).length;
+  const munSet=new Set(rows.filter(a=>a.bloco!=='Aditivo').flatMap(a=>a.municipios).filter(m=>m!=='Brasília'));
+  const fora=rows.filter(a=>a.bloco!=='Aditivo'&&a.municipios.includes('Brasília')).length;
   const allRows=rows; const adt=rows.filter(a=>a.bloco==='Aditivo'); rows=rows.filter(a=>a.bloco!=='Aditivo');
   const nSc=rows.filter(a=>a.sociocultural==='Sim').length;
-  $('#kpiValid').hidden=PERIODO==='Aditivo'; $('#adtBox').hidden=(PERIODO==='Ano 1'||PERIODO==='Ano 2');
+  $('#kpiValid').hidden=PERIODO==='Aditivo'; $('#adtBox').hidden=!(PERIODO==='Aditivo'||PERIODO==='total');
+  $('#kpiTitle').textContent={'Ano I':'Ações validadas · Ano I (2024)','Ano II':'Ações validadas · Ano II (2025–2026)','anos':'Ações validadas · Ano I + Ano II','total':'Ações validadas · Ano I + Ano II (o Aditivo aparece logo abaixo)'}[PERIODO]||'';
   {const FA=new Set(META_ADT.fora_uf||[]); const am=new Set(adt.flatMap(a=>a.municipios).filter(m=>!FA.has(m)));
-   const base=PERIODO==='anos'?A.filter(a=>a.bloco==='Aditivo'):adt;
-   const bm=new Set(base.flatMap(a=>a.municipios).filter(m=>!FA.has(m)));
-   const src=PERIODO==='anos'?base:adt;
-   $('#aAcoes').textContent=fmtN(src.length); $('#aSc').textContent=fmtN(src.filter(a=>a.sociocultural==='Sim').length);
-   $('#aPart').textContent=fmtN(sum(src,'participantes')); $('#aHoras').textContent=fmtN(sum(src,'carga'));
-   const ms=PERIODO==='anos'?bm:am; $('#aMun').textContent=fmtN(ms.size);
-   const novos=[...ms].filter(m=>!MUN_ANOS.has(m)).length; const rem=src.filter(a=>!a.municipios.length).length;
+   $('#aAcoes').textContent=fmtN(adt.length); $('#aSc').textContent=fmtN(adt.filter(a=>a.sociocultural==='Sim').length);
+   $('#aPart').textContent=fmtN(sum(adt,'participantes')); $('#aHoras').textContent=fmtN(sum(adt,'carga'));
+   $('#aMun').textContent=fmtN(am.size);
+   const novos=[...am].filter(m=>!MUN_ANOS.has(m)).length; const rem=adt.filter(a=>!a.municipios.length).length;
    $('#aMunH').textContent=novos+' ainda não alcançados no Ano I e II.'+(rem?' '+rem+' ações on-line.':'')+((META_ADT.fora_uf||[]).length?' Fora do estado: '+META_ADT.fora_uf.join(', ')+'.':'');}
+  somatoria();
   $('#kTotal').textContent=fmtN(rows.length+nSc);
   $('#kTotalH').textContent=fmtN(rows.length)+' ações validadas + '+fmtN(nSc)+' ações socioculturais associadas.';
   $('#kAcoes').textContent=fmtN(rows.length);
@@ -637,11 +678,11 @@ function render(){
 }
 
 const bind=(sel,k,ev='change')=>$(sel).addEventListener(ev,e=>{F[k]=e.target.value; page=0; render();});
-bind('#fTipo','tipo'); bind('#fOsc','osc'); bind('#fMun','mun'); bind('#fAno','ano'); bind('#fFmt','fmt'); bind('#fVal','val');
+bind('#fTipo','tipo'); bind('#fOsc','osc'); bind('#fMun','mun'); $('#fAno').addEventListener('change',e=>setPer(e.target.value)); bind('#fFmt','fmt'); bind('#fVal','val');
 let qt; $('#fq').addEventListener('input',e=>{clearTimeout(qt); qt=setTimeout(()=>{F.q=e.target.value; page=0; render();},180);});
 $('#clear').addEventListener('click',()=>{Object.keys(F).forEach(k=>F[k]=''); syncSelects(); page=0; render();});
 
-document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{PERIODO=b.dataset.per; document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',x===b)); page=0; render();}));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setPer(b.dataset.per)));
 $('#autoLast').textContent=(META_ADT.verificado_em||'—')+' · '+(META_ADT.n||0)+' ações do aditivo';
 function buildCSV(){
   const cols=[['periodo','periodo'],['bloco','bloco'],['inicio','data_inicio'],['fim','data_fim'],['nome','acao'],['tipo','meta'],['osc','osc_executora'],['meta','codigo_meta'],['executora','tipo_executora'],['osc_nome','osc_nome_completo'],['municipios','municipios'],['local','local'],['parceiros','parceiros'],['tipos_parceiros','tipos_parceiros'],['gpte','publicos_tradicionais'],['editais','mobilizacao_editais'],['formato','formato'],['porte','porte'],['carga','carga_horaria'],['participantes','participantes_validados'],['sociocultural','acao_sociocultural'],['linguagens','linguagens_socioculturais'],['status','validacao'],['diligencia','recebeu_diligencia'],['ressalva','recebeu_ressalva'],['fotos','links_fotos'],['lista','links_lista_presenca'],['divulgacao','links_divulgacao'],['fotos_sc','links_fotos_sociocultural'],['eixo','eixo_formacao'],['temas','temas'],['ementa','links_ementa'],['material','links_material']];
@@ -656,7 +697,8 @@ $('#csv').addEventListener('click',()=>{
 });
 
 let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>colChart(filtered()),150);});
-render();
+{const h=decodeURIComponent(location.hash.slice(1)); if(/^PR-A\d{4}/.test(h)){const a=A.find(x=>x.codigo===h); if(a){ if(!inPer(a)) PERIODO=a.bloco==='Aditivo'?'Aditivo':'anos'; F.q=a.nome; open.add(a.id); setTimeout(()=>{const s=document.getElementById('acoes'); if(s) s.scrollIntoView();},60); }}}
+setPer(PERIODO); syncSelects();
 })();
 </script>
 </body>

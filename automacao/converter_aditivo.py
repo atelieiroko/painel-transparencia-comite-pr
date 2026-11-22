@@ -1,12 +1,18 @@
 """Lê a Planilha viva do aditivo (exportada em .xlsx) e gera os registros do
 aditivo no mesmo formato das ações do Ano I e II do painel.
 
-Uso: python3 converter_aditivo.py viva.xlsx saida.json
+Uso: python3 converter_aditivo.py viva.xlsx saida.json [copias.xlsx] [backup.json]
+backup.json = listagem das pastas de backup {código: {sigla: [[nº, id, nome], ...]}};
+tem prioridade sobre copias.xlsx (é o que de fato está na pasta).
+copias.xlsx = planilha "Controle de cópias_Aditivo" (backup codificado). Quando
+informada, as fotos (FOT e FSC) apontam para as cópias codificadas do backup.
 Nada de e-mail ou nome de responsável é levado para o painel.
 """
 import openpyxl, json, re, sys, datetime
 
 src, out_path = sys.argv[1:3]
+cop_path = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != '-' else None
+bkp_path = sys.argv[4] if len(sys.argv) > 4 else None
 wb = openpyxl.load_workbook(src, read_only=True, data_only=True)
 
 def s(v): return ' '.join(str(v).split()) if v is not None else ''
@@ -45,6 +51,27 @@ for r in it:
     cod = s(r[ix['Código da ação']]); link = s(r[ix['Link original']])
     if cod and link.startswith('http'):
         docs.setdefault(cod, {}).setdefault(s(r[ix['Sigla']]), []).append(link)
+
+# --- cópias codificadas do backup (fotos seguem a codificação)
+copias = {}
+if cop_path:
+    wc = openpyxl.load_workbook(cop_path, read_only=True, data_only=True)
+    it = wc['Cópias'].iter_rows(values_only=True); H = [s(h) for h in next(it)]
+    ix = {h: i for i, h in enumerate(H)}
+    for r in it:
+        r = list(r) + [None] * (len(H) - len(r))
+        doc = s(r[ix['Código do documento']]); cid = s(r[ix['ID da cópia']])
+        if not doc or not cid or not s(r[ix['Situação']]).upper().startswith('COPIADO'): continue
+        m = re.match(r'(PR-A\d{4}-[A-Z]{3}-\d{7}-\d{6})_([A-Z]{3})(\d{3})', doc)
+        if m: copias.setdefault(m.group(1), {}).setdefault(m.group(2), {})[m.group(3)] = f'https://drive.google.com/file/d/{cid}/view'
+if bkp_path:
+    for cod, sig in json.load(open(bkp_path, encoding='utf-8')).items():
+        for sigla, arqs in sig.items():
+            copias.setdefault(cod, {})[sigla] = {n: f'https://drive.google.com/file/d/{fid}/view' for n, fid, *_ in arqs}
+def codificadas(cod, sigla, originais):
+    c = copias.get(cod, {}).get(sigla)
+    if not c: return originais
+    return [c[k] for k in sorted(c)]
 
 # --- respostas do formulário
 ws = wb['Respostas (espelho)']; it = ws.iter_rows(values_only=True); H = [s(h) for h in next(it)]
@@ -102,8 +129,8 @@ for r in it:
         editais=None, porte=None, participantes=part,
         eixo=s(r[C['eixo']]) or None, temas=temas or None, evento=s(r[C['evento']]) or None,
         regiao_prioritaria=None if rip.upper() in ('', 'NÃO', 'NAO') else rip,
-        fotos=dc.get('FOT', []), lista=dc.get('LST', []) + dc.get('LDG', []), divulgacao=dc.get('DIV', []),
-        fotos_sc=dc.get('FSC', []), ementa=dc.get('EME', []), material=dc.get('MAT', []),
+        fotos=codificadas(cod, 'FOT', dc.get('FOT', [])), lista=dc.get('LST', []) + dc.get('LDG', []), divulgacao=dc.get('DIV', []),
+        fotos_sc=codificadas(cod, 'FSC', dc.get('FSC', [])), ementa=dc.get('EME', []), material=dc.get('MAT', []),
         com_anexo=[], com_links=[], sociocultural=sc,
         linguagens=[v for k, v in LING if k.lower() in lt]))
     if not dc.get('LST') and not dc.get('LDG'): rel.append(f'[sem lista de presença] {cod}')
