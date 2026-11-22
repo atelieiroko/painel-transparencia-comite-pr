@@ -22,6 +22,6 @@ Esta branch (`main`) é a **Rev.0C**, a revisão atual do Portal da Transparênc
 ## Revisões anteriores
 
 - Rev.0B (codificação): branch `rev0b`.
-- Versão nacional dos 27 comitês: branch `rev0c` (protótipo anterior; a Rev.0C oficial é esta branch `main`).
+- Protótipo anterior da versão nacional dos 27 comitês: branch `prototipo-nacional` (antes chamada `rev0c`; a Rev.0C oficial é esta branch `main`).
 
 Dados sensíveis (e-mails, nomes de responsáveis, comentários internos da conferência) não são publicados.
