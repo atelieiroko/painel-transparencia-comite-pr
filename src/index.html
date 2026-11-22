@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mapa das ações dos Comitês de Cultura — protótipo nacional</title>
+<title>Mapa das ações — Comitê de Cultura do Paraná (PNCC)</title>
 <style>
 :root{
   color-scheme: light;
@@ -11,7 +11,8 @@
   --ink:#1d1a16; --ink-2:#55504a; --ink-3:#7a736a;
   --accent:#9a3b17; --accent-soft:#f6e3d8; --warn:#9a6a00;
   --land:#ece6dc; --land-line:#d6cdbf; --mun-line:#e4dccf;
-  --c1:#f3d9c9; --c2:#e7a985; --c3:#cf7044; --c4:#9a3b17;
+  --p1:#2a78d6; --p2:#1baf7a; --p3:#eb6834;
+  --c1:#f3d9c9; --c2:#e7a985; --c3:#cf7044;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
@@ -24,8 +25,10 @@ h1{font-size:clamp(24px,3.4vw,36px);line-height:1.12;margin:6px 0 10px;letter-sp
 .chip{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
 .chip b{color:var(--ink)}
 .chip.study{border:2px dashed var(--warn)}
-.note{display:flex;gap:10px;background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:12px;padding:11px 15px;margin:14px 0 0;font-size:14px}
-.note b{color:var(--accent)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.tabs button{border-radius:999px;font-weight:600;font-size:13.5px;padding:6px 14px}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs .tab-adt[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#fff}
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:18px 0 12px}
 .f{display:flex;flex-direction:column;gap:3px}
 .f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
@@ -39,20 +42,22 @@ button:disabled{opacity:.45;cursor:default}
 .mapcard{position:relative;padding:8px}
 #map{width:100%;height:auto;display:block;touch-action:none}
 #map .uf{fill:var(--land);stroke:var(--land-line);stroke-width:.6;vector-effect:non-scaling-stroke}
-#map .uf.data{cursor:pointer}
+#map .uf.data{cursor:pointer;fill:#e6dccd}
 #map .uf.data:hover{stroke:var(--accent);stroke-width:1.4}
 #map .mun{stroke:var(--mun-line);stroke-width:.4;vector-effect:non-scaling-stroke;fill:#f7f3ec}
 #map .mun.has{cursor:pointer}
 #map .ufline{fill:none;stroke:#bfb4a3;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
-#map .route{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;opacity:.8;pointer-events:none}
-#map .dot{fill:var(--accent);fill-opacity:.72;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}
-#map .dot:hover,#map .dot.sel{fill-opacity:1;stroke:var(--ink);stroke-width:2}
+#map .route{fill:none;stroke-width:1.6;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;opacity:.85;pointer-events:none}
+#map .pie{cursor:pointer}
+#map .pie path,#map .pie circle.s{stroke:#fff;stroke-width:1.2;vector-effect:non-scaling-stroke}
+#map .pie:hover .ring,#map .pie.sel .ring{stroke:var(--ink);stroke-width:2.2}
+#map .ring{fill:none;stroke:none;vector-effect:non-scaling-stroke}
 #map .lbl{font-size:11px;fill:var(--ink);paint-order:stroke;stroke:#fffdf9;stroke-width:3px;pointer-events:none;font-weight:600}
-.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;padding:7px 10px;border-radius:8px;opacity:0;transition:opacity .12s;max-width:260px;z-index:3}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;padding:7px 10px;border-radius:8px;opacity:0;transition:opacity .12s;max-width:280px;z-index:3}
 .legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12.5px;color:var(--ink-2);padding:8px 10px 4px}
-.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--land-line)}
-.sw.dot{border-radius:50%;background:var(--accent);opacity:.75;border:1px solid #fff}
-.sw.route{width:22px;height:0;border:0;border-top:2px dashed var(--accent);border-radius:0;vertical-align:3px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px;border:1px solid var(--land-line)}
+.sw.dot{border-radius:50%;border:1px solid #fff}
+.sw.route{width:22px;height:0;border:0;border-top:2px dashed var(--ink-3);border-radius:0;vertical-align:3px}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .kpi{background:var(--surface-2);border-radius:12px;padding:10px 12px}
 .kpi .v{font-size:26px;font-weight:800;letter-spacing:-.02em}
@@ -67,131 +72,110 @@ a.code{display:inline-block;text-decoration:underline;text-underline-offset:2px}
 a.code:hover{color:var(--ink)}
 .muted{color:var(--ink-3);font-size:12.5px}
 .tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:4px;color:var(--ink-2)}
+.ptag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;color:#fff;white-space:nowrap}
+.ptag.p1{background:var(--p1)} .ptag.p2{background:#148a60} .ptag.p3{background:#b54a1d}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
 th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
-td.num,th.num{text-align:right}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 tr.clk{cursor:pointer}
 tr.clk:hover td{background:var(--surface-2)}
+tr.tot td{font-weight:800;background:var(--surface-2)}
 .tablewrap{max-height:460px;overflow:auto}
 footer{padding:26px 0 44px;color:var(--ink-3);font-size:12.5px}
 .err{background:#fde8e8;border:1px solid #c0392b;color:#7a1d14;border-radius:12px;padding:12px 16px;margin:14px 0}
 .hint{font-size:12.5px;color:var(--ink-3);margin:6px 2px 0}
-.only-com{display:none}
-.mode-com .only-com{display:revert}
-.mode-com .only-acoes{display:none}
-#map .uf.sit{cursor:pointer}
-#map .uf.sit:hover{stroke:var(--accent);stroke-width:1.4}
-#map .uf.selc{stroke:var(--ink);stroke-width:2.2}
-#map .sede{fill:var(--accent);stroke:#fff;stroke-width:1.2;vector-effect:non-scaling-stroke;cursor:pointer}
-#map .parc{fill:#fff;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
-#map .sede:hover,#map .parc:hover{stroke:var(--ink)}
-#map .link{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:2 3;vector-effect:non-scaling-stroke;opacity:.6;pointer-events:none}
-.sw.sede{background:var(--accent);border-radius:2px;border:1px solid #fff;transform:rotate(45deg) scale(.8)}
-.sw.parc{border-radius:50%;background:#fff;border:2px solid var(--accent)}
-.sit-tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;border:1px solid var(--line)}
-dl.ficha{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;margin:8px 0}
-dl.ficha dt{color:var(--ink-3)}
-dl.ficha dd{margin:0}
-a.btnp{display:inline-block;margin-top:8px;font-weight:700;color:var(--accent)}
+.wait{font-size:11px;font-weight:700;color:var(--warn);margin-left:6px}
 .embed body{background:transparent}
 .embed header,.embed footer{display:none}
 .embed .wrap{padding:0 2px}
-.embed .bar{margin-top:4px}
 </style>
 </head>
 <body>
 <header class="wrap">
-  <div class="eyebrow">Programa Nacional dos Comitês de Cultura · protótipo</div>
-  <h1>Mapa dos Comitês de Cultura</h1>
-  <p class="lead">Duas camadas. <b>Comitês</b>: os 27 Termos de Colaboração pelo Brasil, a situação de cada um, a sede da OSC celebrante e as OSCs parceiras. <b>Ações</b>: onde as ações validadas aconteceram, município por município. Tudo é ligado ao mapa oficial do IBGE pelo código do município.</p>
+  <div class="eyebrow">Portal da Transparência · Programa Nacional dos Comitês de Cultura</div>
+  <h1>Mapa das ações do Comitê de Cultura do Paraná</h1>
+  <p class="lead">Onde as ações aconteceram, município por município, separadas como no painel: <b>Ano I</b> (2024), <b>Ano II</b> (2025–2026), a somatória <b>Ano I + Ano II</b> (ações validadas), o <b>Aditivo 2026</b> (ainda aguardando validação) e o <b>Total</b>. O mapa mostra o Brasil inteiro; os estados em tom mais escuro têm ações.</p>
   <div class="chips">
-    <span class="chip">Comitês com dados: <b id="cComites">—</b></span>
+    <span class="chip">Fontes: <b>conferência de 03/06/2026 (Ano I e II) · planilha viva do aditivo</b></span>
     <span class="chip">Malha territorial: <b>IBGE (API de malhas)</b></span>
     <span class="chip study">Codificação: <b>em estudo</b></span>
   </div>
-  <div class="note" role="note"><span>ⓘ</span><div><b>Protótipo.</b> A camada Comitês traz os dados dos Termos de Colaboração dos 27 comitês. Na camada Ações, por enquanto só o Comitê de Cultura do Paraná tem dados carregados; os demais estados aparecem em cinza até que seus comitês preencham a planilha com o mesmo cabeçalho. O código do município usa a Divisão Territorial Brasileira (DTB) do IBGE, que é um estudo de codificação e difere da codificação do PNCC, que define códigos apenas para os estados.</div></div>
+  <div class="tabs" role="group" aria-label="Período">
+    <button type="button" data-per="Ano I" aria-pressed="false">Ano I · 2024</button>
+    <button type="button" data-per="Ano II" aria-pressed="false">Ano II · 2025–2026</button>
+    <button type="button" data-per="anos" aria-pressed="true">Ano I + Ano II · validadas</button>
+    <button type="button" data-per="Aditivo" class="tab-adt" aria-pressed="false">Aditivo 2026 · aguardando validação</button>
+    <button type="button" data-per="total" aria-pressed="false">Total</button>
+  </div>
 </header>
 
 <main class="wrap">
   <div class="bar" role="search">
-    <div class="f"><label for="fCamada">Camada</label><select id="fCamada"><option value="acoes">Ações</option><option value="comites">Comitês (Termos de Colaboração)</option></select></div>
-    <div class="f only-com"><label for="fReg">Região</label><select id="fReg"></select></div>
-    <div class="f only-com"><label for="fSit">Situação do TC</label><select id="fSit"></select></div>
-    <div class="f only-acoes"><label for="fComite">Comitê</label><select id="fComite"></select></div>
-    <div class="f only-acoes"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
-    <div class="f only-acoes"><label for="fAno">Ano</label><select id="fAno"></select></div>
-    <div class="f only-acoes"><label for="fMed">Tamanho do círculo</label><select id="fMed"><option value="n">Número de ações</option><option value="p">Participações</option></select></div>
+    <div class="f"><label for="fPer">Período</label><select id="fPer"></select></div>
+    <div class="f"><label for="fTipo">Meta</label><select id="fTipo"></select></div>
+    <div class="f"><label for="fOsc">OSC executora</label><select id="fOsc"></select></div>
+    <div class="f"><label for="fMed">Tamanho do círculo</label><select id="fMed"><option value="n">Número de ações</option><option value="p">Participações</option></select></div>
     <button id="btnBR" type="button" class="primary" disabled>Ver o Brasil inteiro</button>
-    <button id="btnRoutes" type="button" class="only-acoes" aria-pressed="true">Rotas das caravanas: ligadas</button>
+    <button id="btnPR" type="button">Aproximar no Paraná</button>
+    <button id="btnRoutes" type="button" aria-pressed="true">Rotas das caravanas: ligadas</button>
   </div>
   <div id="erro"></div>
 
   <div class="layout">
     <div class="card mapcard">
-      <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Mapa do Brasil com as ações dos Comitês de Cultura por município"></svg>
+      <svg id="map" viewBox="0 0 1000 1000" role="img" aria-label="Mapa do Brasil com as ações do Comitê de Cultura do Paraná por município, separadas por período"></svg>
       <div class="tip" id="tip"></div>
       <div class="legend" id="legend"></div>
-      <p class="hint only-acoes">Arraste para mover e use a roda do mouse para aproximar. Clique em um estado com dados para aproximar nele e em “Ver o Brasil inteiro” para voltar.</p>
-      <p class="hint only-com">Clique em um estado, em uma sede ou em uma parceira para ver o comitê. Arraste para mover e use a roda do mouse para aproximar.</p>
+      <p class="hint">Cada círculo é um município. A cor mostra o período das ações; quando há mais de um período, o círculo é dividido na proporção de cada um. Arraste para mover, use a roda do mouse para aproximar e clique em um estado com ações para aproximar nele.</p>
     </div>
     <aside class="card" aria-live="polite">
       <div class="kpis">
-        <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l" id="lAcoes">ações no mapa</div></div>
-        <div class="kpi"><div class="v" id="kMun">—</div><div class="l" id="lMun">municípios com ação</div></div>
-        <div class="kpi"><div class="v" id="kUf">—</div><div class="l" id="lUf">estados com ação</div></div>
-        <div class="kpi"><div class="v" id="kRem">—</div><div class="l" id="lRem">ações remotas (fora do mapa)</div></div>
+        <div class="kpi"><div class="v" id="kAcoes">—</div><div class="l">ações no mapa</div></div>
+        <div class="kpi"><div class="v" id="kMun">—</div><div class="l">municípios com ação</div></div>
+        <div class="kpi"><div class="v" id="kUf">—</div><div class="l">estados com ação</div></div>
+        <div class="kpi"><div class="v" id="kRem">—</div><div class="l">ações on-line (fora do mapa)</div></div>
       </div>
       <h3 id="selTitle">Selecione um município</h3>
       <p class="sub" id="selSub">Clique em um círculo no mapa ou em uma linha da tabela abaixo.</p>
-      <p class="muted only-acoes" style="margin:0 0 6px">Clique no código de uma ação para abri-la no Painel de Transparência.</p>
-      <div id="selCom"></div>
+      <p class="muted" style="margin:0 0 6px">Clique no código de uma ação para abri-la no Painel de Transparência.</p>
       <ul class="list" id="selList"></ul>
     </aside>
   </div>
 
-  <section class="card only-com" style="margin-top:16px">
-    <h2>Comitês de Cultura pelo Brasil</h2>
-    <p class="sub">Um Termo de Colaboração por estado. Dados: planilha de informações dos TCs dos comitês. E-mails, telefones e endereços não são publicados; da sede aparece só o município.</p>
-    <div class="tablewrap">
-      <table id="tblC"><thead><tr>
-        <th data-k="seq" class="num">Nº</th><th data-k="uf">UF</th><th data-k="regiao">Região</th><th data-k="osc">OSC celebrante</th><th data-k="sit">Situação</th><th data-k="sede">Sede</th><th data-k="np" class="num">Parceiras</th>
-      </tr></thead><tbody></tbody></table>
-    </div>
+  <section class="card" style="margin-top:16px">
+    <h2>Ações no mapa por período</h2>
+    <p class="sub">Mesma regra do painel. Ações on-line não têm município e ficam fora do mapa. Municípios fora do Paraná aparecem no mapa, mas não entram na contagem de municípios do Paraná.</p>
+    <div class="tablewrap"><table id="tblP"><thead><tr>
+      <th>Período</th><th class="num">Ações</th><th class="num">No mapa</th><th class="num">On-line</th><th class="num">Participações</th><th class="num">Municípios do PR</th>
+    </tr></thead><tbody></tbody></table></div>
   </section>
 
-  <section class="card only-acoes" style="margin-top:16px">
+  <section class="card" style="margin-top:16px">
     <h2>Municípios com ações</h2>
     <p class="sub">Caravanas que passaram por vários municípios contam em cada um deles. Participações somam só as ações realizadas em um único município, como no painel de transparência.</p>
     <div class="tablewrap">
       <table id="tbl"><thead><tr>
         <th data-k="nome">Município</th><th data-k="uf">UF</th><th data-k="c">Código IBGE</th>
-        <th data-k="n" class="num">Ações</th><th data-k="p" class="num">Participações</th>
+        <th data-k="a1" class="num">Ano I</th><th data-k="a2" class="num">Ano II</th><th data-k="ad" class="num">Aditivo</th>
+        <th data-k="n" class="num">Ações no período</th><th data-k="p" class="num">Participações</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </section>
 </main>
 
 <footer class="wrap">
-  Comitês: planilha de informações dos Termos de Colaboração dos comitês (27 TCs). Ações: planilhas de conferência dos Comitês de Cultura (Paraná: versão de 03/06/2026, 148 ações validadas). Municípios e estados: IBGE, API de malhas geográficas (qualidade mínima) e Divisão Territorial Brasileira. Malha baixada em <span id="geoData">—</span>.
+  Ações: conferência do Comitê de Cultura do Paraná (versão de 03/06/2026, 148 ações validadas do Ano I e II) e planilha viva do Aditivo 2026 (ações registradas, aguardando validação). Municípios e estados: malhas do IBGE, baixadas em <span id="geoData">—</span>. Ano I = ações iniciadas em 2024; Ano II = iniciadas em 2025 e 2026. A codificação das ações é um estudo e pode mudar.
 </footer>
 
 <script>
 (function(){
 const UF={'11':'RO','12':'AC','13':'AM','14':'RR','15':'PA','16':'AP','17':'TO','21':'MA','22':'PI','23':'CE','24':'RN','25':'PB','26':'PE','27':'AL','28':'SE','29':'BA','31':'MG','32':'ES','33':'RJ','35':'SP','41':'PR','42':'SC','43':'RS','50':'MS','51':'MT','52':'GO','53':'DF'};
-const SIG2COD=Object.fromEntries(Object.entries(UF).map(([c,s])=>[s,c]));
 const $=s=>document.querySelector(s);
 const NS='http://www.w3.org/2000/svg';
 const QS=new URLSearchParams(location.search);
-const PAINEIS={'0b':'https://painel-transparencia-comite-pr-rev0.vercel.app/','0c':'https://painel-transparencia-comite-pr-rev0c.vercel.app/'};
-const VERSAO=PAINEIS[QS.get('painel')]?QS.get('painel'):'0b';
-const PAINEL=PAINEIS['0b']; // as ações estão no painel Rev.0B; o Rev.0C é só nacional
-const PAINEL_COM=PAINEIS['0c'];
-const SIT_COR={'ATIVO':'#e9b796','EM DISTRATO':'#efd58f','DISTRATADO':'#cbc3b8','NÃO CELEBRADO':'#f7f3ec'};
-const SIT_TXT={'ATIVO':'Ativo','EM DISTRATO':'Em distrato','DISTRATADO':'Distratado','NÃO CELEBRADO':'Não celebrado'};
-let C=[], modo=QS.get('camada')==='comites'?'comites':'acoes', selC=null;
-const FC={reg:'',sit:''};
-const EMBED=new URLSearchParams(location.search).has('embed');
+const PAINEL='https://painel-transparencia-comite-pr.vercel.app/';
+const EMBED=QS.has('embed');
 if(EMBED) document.documentElement.classList.add('embed');
 function sendHeight(){ if(EMBED && window.parent!==window){ try{ window.parent.postMessage({type:'mapa-acoes-altura',h:document.documentElement.scrollHeight},'*'); }catch(e){} } }
 window.addEventListener('resize',()=>setTimeout(sendHeight,50));
@@ -199,14 +183,21 @@ const fmt=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const fmtD=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
 const el=(t,a={},p)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;};
 
-let A=[], UFS=[], MUN={}, CENT={}, NAMES={};
-const F={comite:'',tipo:'',ano:'',med:'n'};
+// Períodos: a mesma regra do painel
+const PERS=[['Ano I','Ano I · 2024'],['Ano II','Ano II · 2025–2026'],['anos','Ano I + Ano II · validadas'],['Aditivo','Aditivo 2026 · aguardando validação'],['total','Total (Ano I + Ano II + Aditivo)']];
+const PCOR={'Ano I':'var(--p1)','Ano II':'var(--p2)','Aditivo':'var(--p3)'};
+const PCLS={'Ano I':'p1','Ano II':'p2','Aditivo':'p3'};
+const PORD=['Ano I','Ano II','Aditivo'];
+const perMatch=(a,p)=>p==='total'?true:p==='anos'?a.bloco!=='Aditivo':a.periodo===p;
+let PER=['Ano I','Ano II','anos','Aditivo','total'].includes(QS.get('periodo'))?QS.get('periodo'):'anos';
+
+let A=[], UFS=[], MUN={}, CENT={};
+const F={tipo:'',osc:'',med:'n'};
 let focusUF=null, sel=null, showRoutes=true, sortK='n', sortDir=-1;
 
-// projeção equiretangular corrigida pela latitude média do Brasil
 const K=Math.cos(-14*Math.PI/180);
 const px=([lon,lat])=>[lon*K, -lat];
-let VB=null;
+let VB=null, VB0=null;
 function bboxOf(geoms){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   const walk=c=>{if(typeof c[0]==='number'){const[x,y]=px(c); if(x<x0)x0=x; if(y<y0)y0=y; if(x>x1)x1=x; if(y>y1)y1=y;} else c.forEach(walk);};
   geoms.forEach(g=>walk(g.coordinates)); return [x0,y0,x1,y1];}
@@ -224,37 +215,27 @@ async function load(){
   const get=async u=>{const r=await fetch(u); if(!r.ok) throw new Error(u+' ('+r.status+')'); return r.json();};
   const meta=await get('geo/meta.json');
   [A,UFS,CENT]=await Promise.all([get('data/acoes.json'),get('geo/ufs.json'),get('geo/centroides.json')]);
-  try{ C=await get('data/comites.json'); }catch(e){ C=[]; }
   for(const uf of meta.ufs) MUN[uf]=await get('geo/mun-'+uf+'.json');
   $('#geoData').textContent=new Date(meta.gerado).toLocaleDateString('pt-BR');
-  A.forEach(a=>a.municipios.forEach(m=>NAMES[m.c]=m.n));
 }
+function opts(id,vals,label){const s=$(id); s.textContent=''; const o=document.createElement('option'); o.value=''; o.textContent=label; s.appendChild(o);
+  vals.forEach(v=>{const e=document.createElement('option'); e.value=v; e.textContent=v; s.appendChild(e);});}
 
-function opts(id,vals,label,fmtv){const s=$(id); s.textContent=''; const o=document.createElement('option'); o.value=''; o.textContent=label; s.appendChild(o);
-  vals.forEach(v=>{const e=document.createElement('option'); e.value=v; e.textContent=fmtv?fmtv(v):v; s.appendChild(e);});}
-
-function rows(){return A.filter(a=>(!F.comite||a.comite===F.comite)&&(!F.tipo||a.tipo===F.tipo)&&(!F.ano||(a.inicio||'').startsWith(F.ano)));}
+const base=a=>(!F.tipo||a.tipo===F.tipo)&&(!F.osc||a.osc===F.osc);
+function rows(p){const P=p||PER; return A.filter(a=>perMatch(a,P)&&base(a));}
 function agg(rs){const m=new Map();
   rs.forEach(a=>{const solo=a.municipios.length===1;
-    a.municipios.forEach(x=>{const g=m.get(x.c)||{c:x.c,nome:x.n,uf:UF[x.c.slice(0,2)],n:0,p:0,acoes:[]}; g.n++; if(solo) g.p+=a.participantes||0; g.acoes.push(a); m.set(x.c,g);});});
+    a.municipios.forEach(x=>{const g=m.get(x.c)||{c:x.c,nome:x.n,uf:UF[x.c.slice(0,2)],n:0,p:0,a1:0,a2:0,ad:0,acoes:[]};
+      g.n++; if(solo) g.p+=a.participantes||0; g[a.periodo==='Ano I'?'a1':a.periodo==='Ano II'?'a2':'ad']++; g.acoes.push(a); m.set(x.c,g);});});
   return m;}
 
-function comRows(){return C.filter(c=>(!FC.reg||c.regiao===FC.reg)&&(!FC.sit||c.situacao===FC.sit));}
 function drawBase(){
   gLand.textContent=''; gUfLine.textContent='';
-  if(modo==='comites'){
-    const vis=new Set(comRows().map(c=>c.uf));
-    UFS.forEach(u=>{const sig=UF[u.c], c=C.find(x=>x.uf===sig);
-      const p=el('path',{d:pathOf(u.g),class:'uf'+(c?' sit':'')+(selC===sig?' selc':'')},gLand);
-      if(c){p.style.fill=vis.has(sig)?(SIT_COR[c.situacao]||'var(--land)'):'var(--land)'; p.addEventListener('click',()=>selectCom(sig));}
-      const t=el('title',{},p); t.textContent=sig+(c?' — '+(SIT_TXT[c.situacao]||c.situacao):'');
-      el('path',{d:pathOf(u.g),class:'ufline'},gUfLine);});
-    return;
-  }
-  const withData=new Set(A.flatMap(a=>a.municipios.map(m=>m.c.slice(0,2))));
-  UFS.forEach(u=>{const p=el('path',{d:pathOf(u.g),class:'uf'+(MUN[u.c]?' data':'')},gLand);
-    const t=el('title',{},p); t.textContent=UF[u.c]+(withData.has(u.c)?' — com ações':' — sem dados ainda');
-    if(MUN[u.c]) p.addEventListener('click',()=>zoomUF(u.c));
+  const withData=new Set(rows().flatMap(a=>a.municipios.map(m=>m.c.slice(0,2))));
+  UFS.forEach(u=>{const has=withData.has(u.c)&&MUN[u.c];
+    const p=el('path',{d:pathOf(u.g),class:'uf'+(has?' data':'')},gLand);
+    const t=el('title',{},p); t.textContent=(UF[u.c]||u.c)+(withData.has(u.c)?' — com ações neste período':' — sem ações');
+    if(has) p.addEventListener('click',()=>zoomUF(u.c));
     el('path',{d:pathOf(u.g),class:'ufline'},gUfLine);});
 }
 function drawMun(m){
@@ -263,68 +244,61 @@ function drawMun(m){
   const max=Math.max(1,...[...m.values()].map(g=>g[F.med]));
   MUN[focusUF].forEach(f=>{const g=m.get(f.c); const v=g?g[F.med]:0;
     const p=el('path',{d:pathOf(f.g),class:'mun'+(g?' has':'')},gMun);
-    if(g){const q=v/max; p.style.fill=q>.66?'var(--c3)':q>.33?'var(--c2)':'var(--c1)'; p.addEventListener('click',()=>select(f.c));}
+    if(g){const q=v/max; p.style.fill=q>.66?'var(--c2)':q>.33?'var(--c1)':'#f8ebe1'; p.addEventListener('click',()=>select(f.c));}
     const t=el('title',{},p); t.textContent=g?(g.nome+' — '+fmt(g.n)+(g.n===1?' ação':' ações')):'';});
 }
 let cur=new Map();
-function drawCom(){
-  const unit=VB[2]/1000;
-  comRows().forEach(c=>{
-    const s=c.sede&&c.sede.c&&CENT[c.sede.c];
-    c.parceiras.forEach(p=>{const q=p.mun&&p.mun.c&&CENT[p.mun.c]; if(s&&q){const a=px(s),b=px(q); el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:'link'},gRoute);}});
-    c.parceiras.forEach(p=>{const q=p.mun&&p.mun.c&&CENT[p.mun.c]; if(!q) return; const [x,y]=px(q);
-      const d=el('circle',{cx:x,cy:y,r:4.2*unit,class:'parc'},gDot);
-      const t=el('title',{},d); t.textContent=p.osc+' — '+p.mun.n+'/'+c.uf+' (OSC parceira)';
-      d.addEventListener('click',ev=>{ev.stopPropagation(); selectCom(c.uf);});});
-    if(s){const [x,y]=px(s), r=5.5*unit;
-      const d=el('rect',{x:x-r,y:y-r,width:2*r,height:2*r,transform:'rotate(45 '+x+' '+y+')',class:'sede'},gDot);
-      const t=el('title',{},d); t.textContent=c.osc+' — sede em '+c.sede.n+'/'+c.uf+' (OSC celebrante)';
-      d.addEventListener('click',ev=>{ev.stopPropagation(); selectCom(c.uf);});
-      if(VB0 && VB[2]<VB0*0.55){const l=el('text',{x:x+r+2*unit,y:y+4*unit,class:'lbl'},gLbl); l.style.fontSize=(11*unit)+'px'; l.style.strokeWidth=(3*unit)+'px'; l.textContent=c.sede.n;}}
-  });
-}
+function arc(cx,cy,r,a0,a1){const x0=cx+r*Math.sin(a0), y0=cy-r*Math.cos(a0), x1=cx+r*Math.sin(a1), y1=cy-r*Math.cos(a1);
+  return 'M'+cx+','+cy+'L'+x0+','+y0+'A'+r+','+r+' 0 '+((a1-a0)>Math.PI?1:0)+' 1 '+x1+','+y1+'Z';}
 function drawDots(){
   gDot.textContent=''; gLbl.textContent=''; gRoute.textContent='';
   if(!VB) return;
-  if(modo==='comites'){ drawCom(); return; }
   const unit=VB[2]/1000;
   const max=Math.max(1,...[...cur.values()].map(g=>g[F.med]||0));
   if(showRoutes) rows().filter(a=>a.municipios.length>1).forEach(a=>{
     const pts=a.municipios.map(m=>CENT[m.c]).filter(Boolean).map(px);
-    if(pts.length>1) el('polyline',{points:pts.map(p=>p.join(',')).join(' '),class:'route'},gRoute);});
+    if(pts.length>1){const l=el('polyline',{points:pts.map(p=>p.join(',')).join(' '),class:'route'},gRoute); l.style.stroke=PCOR[a.periodo];}});
   [...cur.values()].sort((a,b)=>(b[F.med]||0)-(a[F.med]||0)).forEach(g=>{
     const c=CENT[g.c]; if(!c) return; const [x,y]=px(c);
-    const r=(3+15*Math.sqrt((g[F.med]||0)/max))*unit;
-    const d=el('circle',{cx:x,cy:y,r:Math.max(r,2.5*unit),class:'dot'+(sel===g.c?' sel':'')},gDot);
-    d.addEventListener('mouseenter',e=>tip(e,g)); d.addEventListener('mousemove',e=>tip(e,g)); d.addEventListener('mouseleave',()=>$('#tip').style.opacity=0);
-    d.addEventListener('click',ev=>{ev.stopPropagation(); select(g.c);});
+    const r=Math.max((3+15*Math.sqrt((g[F.med]||0)/max))*unit,3*unit);
+    const grp=el('g',{class:'pie'+(sel===g.c?' sel':'')},gDot);
+    const parts=[['Ano I',g.a1],['Ano II',g.a2],['Aditivo',g.ad]].filter(p=>p[1]>0);
+    const tot=parts.reduce((s,p)=>s+p[1],0);
+    if(parts.length===1){const s=el('circle',{cx:x,cy:y,r,class:'s'},grp); s.style.fill=PCOR[parts[0][0]];}
+    else {let a0=0; parts.forEach(([p,v])=>{const a1=a0+2*Math.PI*v/tot; const s=el('path',{d:arc(x,y,r,a0,a1)},grp); s.style.fill=PCOR[p]; a0=a1;});}
+    el('circle',{cx:x,cy:y,r:r+1.2*unit,class:'ring'},grp);
+    grp.addEventListener('mouseenter',e=>tip(e,g)); grp.addEventListener('mousemove',e=>tip(e,g)); grp.addEventListener('mouseleave',()=>$('#tip').style.opacity=0);
+    grp.addEventListener('click',ev=>{ev.stopPropagation(); select(g.c);});
     if(focusUF && (g[F.med]||0)/max>.2){const t=el('text',{x:x+r+2*unit,y:y+4*unit,class:'lbl'},gLbl); t.style.fontSize=(11*unit)+'px'; t.style.strokeWidth=(3*unit)+'px'; t.textContent=g.nome;}
   });
 }
+function partsTxt(g){return [['Ano I',g.a1],['Ano II',g.a2],['Aditivo',g.ad]].filter(p=>p[1]).map(p=>p[0]+': '+fmt(p[1])).join(' · ');}
 function tip(e,g){const t=$('#tip'), box=svg.parentElement.getBoundingClientRect();
   t.innerHTML=''; const b=document.createElement('b'); b.textContent=g.nome+' ('+g.uf+')'; t.appendChild(b);
   t.appendChild(document.createElement('br')); t.appendChild(document.createTextNode(fmt(g.n)+(g.n===1?' ação':' ações')+' · '+fmt(g.p)+' participações'));
-  t.style.left=Math.min(e.clientX-box.left+12,box.width-200)+'px'; t.style.top=(e.clientY-box.top+12)+'px'; t.style.opacity=1;}
+  t.appendChild(document.createElement('br')); t.appendChild(document.createTextNode(partsTxt(g)));
+  t.style.left=Math.min(e.clientX-box.left+12,box.width-220)+'px'; t.style.top=(e.clientY-box.top+12)+'px'; t.style.opacity=1;}
 
 function legend(){const L=$('#legend'); L.innerHTML='';
   const add=(cls,txt,style)=>{const s=document.createElement('span'); const w=document.createElement('i'); w.className='sw '+cls; if(style) w.style.cssText=style; s.append(w,document.createTextNode(txt)); L.appendChild(s);};
-  if(modo==='comites'){
-    Object.keys(SIT_COR).forEach(k=>add('','TC '+SIT_TXT[k].toLowerCase(),'background:'+SIT_COR[k]));
-    add('sede','Sede da OSC celebrante'); add('parc','OSC parceira'); return;
-  }
-  add('dot',F.med==='n'?'Círculo: número de ações no município':'Círculo: participações no município');
+  const vis=PER==='anos'?['Ano I','Ano II']:PER==='total'?PORD:[PER];
+  vis.forEach(p=>add('dot',p==='Aditivo'?'Aditivo 2026 (aguardando validação)':p==='Ano I'?'Ano I · 2024':'Ano II · 2025–2026','background:'+PCOR[p]));
+  add('',F.med==='n'?'Tamanho: número de ações':'Tamanho: participações','display:none');
   if(showRoutes) add('route','Rota de caravana');
-  add('','Estado sem dados ainda','background:var(--land)');
-  if(focusUF){add('','Menos','background:var(--c1)'); add('','','background:var(--c2)'); add('','Mais ações','background:var(--c3)');}
+  add('','Estado com ações','background:#e6dccd'); add('','Estado sem ações','background:var(--land)');
 }
 
 function select(c){sel=c; const g=cur.get(c);
   $('#selTitle').textContent=g?g.nome+' ('+g.uf+')':'Selecione um município';
-  $('#selSub').textContent=g?('Código IBGE '+c+' · '+fmt(g.n)+(g.n===1?' ação':' ações')+' · '+fmt(g.p)+' participações'):'Clique em um círculo no mapa ou em uma linha da tabela abaixo.';
+  $('#selSub').textContent=g?('Código IBGE '+c+' · '+fmt(g.n)+(g.n===1?' ação':' ações')+' · '+fmt(g.p)+' participações · '+partsTxt(g)):'Clique em um círculo no mapa ou em uma linha da tabela abaixo.';
   const ul=$('#selList'); ul.textContent='';
   (g?g.acoes:[]).slice().sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||'')).forEach(a=>{
     const li=document.createElement('li');
-    const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target=EMBED?'_top':'_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação na lista do Painel de Transparência (Rev.0B)'; c1.textContent=a.codigo+' ↗'; li.appendChild(c1);
+    const top=document.createElement('div');
+    if(a.codigo){const c1=document.createElement('a'); c1.className='code'; c1.href=PAINEL+'#'+encodeURIComponent(a.codigo); c1.target=EMBED?'_top':'_blank'; c1.rel='noopener noreferrer'; c1.title='Abrir esta ação no Painel de Transparência'; c1.textContent=a.codigo; top.appendChild(c1);}
+    const pt=document.createElement('span'); pt.className='ptag '+PCLS[a.periodo]; pt.textContent=a.periodo; top.appendChild(pt);
+    if(a.bloco==='Aditivo'){const w=document.createElement('span'); w.className='wait'; w.textContent='⚠ aguardando validação'; top.appendChild(w);}
+    li.appendChild(top);
     const c2=document.createElement('div'); c2.textContent=a.nome; li.appendChild(c2);
     const c3=document.createElement('div'); c3.className='muted';
     c3.textContent=fmtD(a.inicio)+' · '+a.tipo+' · '+a.osc+' · '+(a.participantes!=null?fmt(a.participantes)+' participantes':'público não informado');
@@ -332,76 +306,36 @@ function select(c){sel=c; const g=cur.get(c);
     li.appendChild(c3); ul.appendChild(li);});
   drawDots(); setTimeout(sendHeight,30);
 }
-
-const dd=(dl,k,v)=>{const t=document.createElement('dt'); t.textContent=k; const d=document.createElement('dd'); d.textContent=(v===null||v===undefined||v==='')?'—':v; dl.append(t,d);};
-function selectCom(uf){selC=uf; const c=C.find(x=>x.uf===uf); const box=$('#selCom'); box.textContent='';
-  $('#selTitle').textContent=c?('Comitê de Cultura · '+c.estado+' ('+c.uf+')'):'Selecione um estado';
-  $('#selSub').textContent=c?('Região '+c.regiao+' · Termo de Colaboração nº '+(c.tc||'—')):'Clique em um estado, em uma sede ou em uma parceira no mapa, ou numa linha da tabela abaixo.';
-  $('#selList').textContent='';
-  if(c){
-    const tag=document.createElement('span'); tag.className='sit-tag'; tag.style.background=SIT_COR[c.situacao]||''; tag.textContent='TC '+(SIT_TXT[c.situacao]||c.situacao||'—'); box.appendChild(tag);
-    const dl=document.createElement('dl'); dl.className='ficha';
-    dd(dl,'OSC celebrante',c.osc); dd(dl,'CNPJ',c.cnpj); dd(dl,'Sede',c.sede?c.sede.n+'/'+c.uf:null);
-    dd(dl,'Representante legal',c.representante); dd(dl,'Proposta (Transferegov)',c.proposta); dd(dl,'Instrumento (Transferegov)',c.instrumento);
-    dd(dl,'Termo aditivo',c.aditivo);
-    box.appendChild(dl);
-    const h=document.createElement('h3'); h.textContent='OSCs parceiras ('+c.parceiras.length+')'; box.appendChild(h);
-    const ul=document.createElement('ul'); ul.className='list';
-    if(!c.parceiras.length){const li=document.createElement('li'); li.className='muted'; li.textContent=c.obs_parceiras.length?c.obs_parceiras.join('; '):'Sem informação na planilha.'; ul.appendChild(li);}
-    c.parceiras.forEach(p=>{const li=document.createElement('li'); const b=document.createElement('div'); b.textContent=p.osc; li.appendChild(b);
-      const m=document.createElement('div'); m.className='muted'; m.textContent=p.mun?(p.mun.n+(p.mun.c?' · código IBGE '+p.mun.c:'')+(p.mun.obs?' · '+p.mun.obs:'')):'Município não informado'; li.appendChild(m); ul.appendChild(li);});
-    box.appendChild(ul);
-    const a=document.createElement('a'); a.className='btnp'; a.href=PAINEL_COM+'#comite-'+c.uf; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='Ver no painel nacional dos comitês (Rev.0C) ↗'; box.appendChild(a);
-  }
-  drawBase();
-}
-let sortC='seq', dirC=1;
-function tableCom(){const tb=$('#tblC tbody'); tb.textContent='';
-  const val=(c,k)=>k==='sit'?(SIT_TXT[c.situacao]||''):k==='sede'?(c.sede?c.sede.n:''):k==='np'?c.parceiras.length:c[k];
-  comRows().slice().sort((a,b)=>{const x=val(a,sortC),y=val(b,sortC); return (typeof x==='number'?(x-y):String(x||'').localeCompare(String(y||''),'pt-BR'))*dirC;})
-  .forEach(c=>{const tr=document.createElement('tr'); tr.className='clk';
-    [c.seq,c.uf,c.regiao,c.osc||'—',SIT_TXT[c.situacao]||c.situacao,c.sede?c.sede.n:'—',c.parceiras.length].forEach((v,i)=>{const td=document.createElement('td'); td.textContent=v; if(i===0||i===6) td.className='num'; tr.appendChild(td);});
-    tr.addEventListener('click',()=>{selectCom(c.uf); window.scrollTo({top:svg.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});});
-    tb.appendChild(tr);});}
-document.querySelectorAll('#tblC th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortC===k) dirC*=-1; else {sortC=k; dirC=(k==='np')?-1:1;} tableCom();}));
 function table(){const tb=$('#tbl tbody'); tb.textContent='';
   [...cur.values()].sort((a,b)=>{const x=a[sortK],y=b[sortK]; return (typeof x==='number'?(x-y):String(x).localeCompare(String(y),'pt-BR'))*sortDir;})
   .forEach(g=>{const tr=document.createElement('tr'); tr.className='clk';
-    [g.nome,g.uf,g.c,fmt(g.n),fmt(g.p)].forEach((v,i)=>{const td=document.createElement('td'); td.textContent=v; if(i>2) td.className='num'; tr.appendChild(td);});
+    [g.nome,g.uf,g.c,fmt(g.a1),fmt(g.a2),fmt(g.ad),fmt(g.n),fmt(g.p)].forEach((v,i)=>{const td=document.createElement('td'); td.textContent=v; if(i>2) td.className='num'; tr.appendChild(td);});
     tr.addEventListener('click',()=>{const uf=g.c.slice(0,2); if(focusUF!==uf && MUN[uf]) zoomUF(uf); select(g.c); window.scrollTo({top:svg.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});});
     tb.appendChild(tr);});}
-document.querySelectorAll('#tbl th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==='n'||k==='p')?-1:1;} table();}));
+document.querySelectorAll('#tbl th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=['n','p','a1','a2','ad'].includes(k)?-1:1;} table();}));
+function tablePer(){const tb=$('#tblP tbody'); tb.textContent='';
+  PERS.forEach(([p,l])=>{const rs=rows(p); const map=rs.filter(a=>a.municipios.length);
+    const mun=new Set(rs.flatMap(a=>a.municipios.map(m=>m.c)).filter(c=>c.startsWith('41')));
+    const tr=document.createElement('tr'); tr.className='clk'+(p==='total'||p==='anos'?' tot':''); if(p===PER) tr.style.boxShadow='inset 4px 0 0 var(--accent)';
+    const td0=document.createElement('td'); td0.textContent=l; if(p==='Aditivo'||p==='total'){const w=document.createElement('span'); w.className='wait'; w.textContent=p==='Aditivo'?'⚠ aguardando validação':'⚠ inclui o Aditivo'; td0.appendChild(w);} tr.appendChild(td0);
+    [rs.length,map.length,rs.length-map.length,rs.reduce((s,a)=>s+(a.participantes||0),0),mun.size].forEach(v=>{const td=document.createElement('td'); td.className='num'; td.textContent=fmt(v); tr.appendChild(td);});
+    tr.addEventListener('click',()=>setPer(p)); tb.appendChild(tr);});}
 
-function renderCom(){
-  const rs=comRows();
-  const mun=new Set(); rs.forEach(c=>{if(c.sede&&c.sede.c) mun.add(c.sede.c); c.parceiras.forEach(p=>{if(p.mun&&p.mun.c) mun.add(p.mun.c);});});
-  $('#kAcoes').textContent=fmt(rs.length); $('#lAcoes').textContent='comitês (TCs)';
-  $('#kMun').textContent=fmt(rs.filter(c=>c.situacao==='ATIVO').length); $('#lMun').textContent='com TC ativo';
-  $('#kUf').textContent=fmt(rs.reduce((s,c)=>s+c.parceiras.length,0)); $('#lUf').textContent='OSCs parceiras';
-  $('#kRem').textContent=fmt(mun.size); $('#lRem').textContent='municípios com sede ou parceira';
-  drawBase(); gMun.textContent=''; drawDots(); legend(); tableCom();
-  if(selC) selectCom(selC); else selectCom(null);
-}
-function setModo(m){modo=m; document.documentElement.classList.toggle('mode-com',m==='comites'); $('#fCamada').value=m;
-  if(m==='acoes'){ $('#lAcoes').textContent='ações no mapa'; $('#lMun').textContent='municípios com ação'; $('#lUf').textContent='estados com ação'; $('#lRem').textContent='ações remotas (fora do mapa)'; $('#selCom').textContent=''; drawBase(); select(null);}
-  zoomBR();}
 function render(){
-  if(modo==='comites'){ renderCom(); return; }
   const rs=rows(); cur=agg(rs);
   const mapped=rs.filter(a=>a.municipios.length);
   $('#kAcoes').textContent=fmt(mapped.length);
   $('#kMun').textContent=fmt(cur.size);
   $('#kUf').textContent=fmt(new Set([...cur.keys()].map(c=>c.slice(0,2))).size);
   $('#kRem').textContent=fmt(rs.length-mapped.length);
-  drawMun(cur); drawDots(); legend(); table();
+  drawBase(); drawMun(cur); drawDots(); legend(); table(); tablePer();
   if(sel && !cur.has(sel)) select(null); else if(sel) select(sel);
   setTimeout(sendHeight,30);
 }
-let VB0=null;
+function setPer(p){PER=p; document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.per===p)); $('#fPer').value=p; render();}
 function zoomBR(){focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); VB0=VB[2]; render();}
-function zoomUF(uf){if(modo==='comites') return; focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
+function zoomUF(uf){if(!MUN[uf]) return; focusUF=uf; $('#btnBR').disabled=false; setView(bboxOf(MUN[uf].map(f=>f.g)),.04); render();}
 
-// arrastar e aproximar
 let drag=null, moved=false;
 svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,vb:VB.slice(),id:e.pointerId}; moved=false;});
 svg.addEventListener('pointermove',e=>{if(!drag) return;
@@ -415,22 +349,18 @@ svg.addEventListener('wheel',e=>{e.preventDefault(); const r=svg.getBoundingClie
   VB=[mx-(mx-VB[0])*f, my-(my-VB[1])*f, VB[2]*f, VB[3]*f]; svg.setAttribute('viewBox',VB.join(' ')); drawDots(); $('#btnBR').disabled=false;},{passive:false});
 
 $('#btnBR').addEventListener('click',zoomBR);
+$('#btnPR').addEventListener('click',()=>zoomUF('41'));
 $('#btnRoutes').addEventListener('click',e=>{showRoutes=!showRoutes; e.currentTarget.textContent='Rotas das caravanas: '+(showRoutes?'ligadas':'desligadas'); e.currentTarget.setAttribute('aria-pressed',showRoutes); drawDots(); legend();});
-$('#fCamada').addEventListener('change',e=>setModo(e.target.value));
-[['#fReg','reg'],['#fSit','sit']].forEach(([s,k])=>$(s).addEventListener('change',e=>{FC[k]=e.target.value; render();}));
-[['#fComite','comite'],['#fTipo','tipo'],['#fAno','ano'],['#fMed','med']].forEach(([s,k])=>$(s).addEventListener('change',e=>{F[k]=e.target.value; render();}));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setPer(b.dataset.per)));
+$('#fPer').addEventListener('change',e=>setPer(e.target.value));
+[['#fTipo','tipo'],['#fOsc','osc'],['#fMed','med']].forEach(([s,k])=>$(s).addEventListener('change',e=>{F[k]=e.target.value; render();}));
 
 load().then(()=>{
-  const comites=[...new Set(A.map(a=>a.comite))].sort();
-  $('#cComites').textContent=comites.join(', ');
-  opts('#fComite',comites,'Todos',s=>s+' — Comitê de Cultura');
+  {const s=$('#fPer'); PERS.forEach(([v,l])=>{const o=document.createElement('option'); o.value=v; o.textContent=l; s.appendChild(o);});}
   opts('#fTipo',[...new Set(A.map(a=>a.tipo))].sort(),'Todas');
-  opts('#fAno',[...new Set(A.map(a=>(a.inicio||'').slice(0,4)).filter(Boolean))].sort(),'Todos');
-  opts('#fReg',[...new Set(C.map(c=>c.regiao))].sort(),'Todas');
-  opts('#fSit',Object.keys(SIT_TXT).filter(k=>C.some(c=>c.situacao===k)),'Todas',k=>SIT_TXT[k]);
-  if(!C.length){ $('#fCamada').disabled=true; modo='acoes'; }
-  const h=decodeURIComponent(location.hash.slice(1)); if(/^comite-[A-Z]{2}$/.test(h)){ modo='comites'; selC=h.slice(7); }
-  setModo(modo);
+  opts('#fOsc',[...new Set(A.map(a=>a.osc))].sort(),'Todas');
+  focusUF=null; $('#btnBR').disabled=true; setView(bboxOf(UFS.map(u=>u.g)),.02); VB0=VB[2];
+  setPer(PER);
 }).catch(err=>{$('#erro').innerHTML=''; const d=document.createElement('div'); d.className='err'; d.textContent='Não foi possível carregar os dados do mapa: '+err.message; $('#erro').appendChild(d);});
 })();
 </script>

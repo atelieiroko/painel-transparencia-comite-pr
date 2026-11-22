@@ -1,5 +1,5 @@
 // Build do Mapa das Ações dos Comitês de Cultura.
-// Roda na Vercel a cada publicação: junta os arquivos data/acoes-*.json e data/comites.json e baixa
+// Roda na Vercel a cada publicação: junta os arquivos data/acoes-*.json e baixa
 // as malhas oficiais do IBGE (API de malhas v3) só para os estados com ações.
 // Os municípios são ligados às ações pelo código DTB/IBGE de 7 dígitos.
 import { readFile, writeFile, mkdir, copyFile, readdir } from 'node:fs/promises';
@@ -60,13 +60,7 @@ for (const f of (await readdir('data')).filter(f => /^acoes-.*\.json$/.test(f)).
 }
 await writeFile(`${OUT}/data/acoes.json`, JSON.stringify(acoes));
 
-// 1b. Comitês (Termos de Colaboração): sede da OSC celebrante e OSCs parceiras
-let comites = [];
-try { comites = JSON.parse(await readFile('data/comites.json', 'utf-8')); } catch (e) { console.log('Sem data/comites.json'); }
-await writeFile(`${OUT}/data/comites.json`, JSON.stringify(comites));
 const codComites = new Set();
-comites.forEach(c => { if (c.sede && c.sede.c) codComites.add(c.sede.c); c.parceiras.forEach(p => { if (p.mun && p.mun.c) codComites.add(p.mun.c); }); });
-console.log(`Comitês: ${comites.length}, municípios de sede ou parceira: ${codComites.size}`);
 
 // 2. Estados (Brasil inteiro)
 const br = await get(`${BASE}/paises/BR?${GEO}&intrarregiao=UF`);
