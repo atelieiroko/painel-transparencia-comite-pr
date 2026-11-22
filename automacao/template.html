@@ -134,6 +134,10 @@ tr.detail td{background:var(--surface-2);font-size:13px}
 .ptag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .ptag.adt{background:var(--warn);color:#fff}
 .somat{margin-top:16px}
+.mapcta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:8px 0 28px}
+.mapbtn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:700;font-size:16px;padding:12px 20px;border-radius:999px;text-decoration:none}
+.mapbtn:hover{filter:brightness(1.08)}
+.mapnote{color:var(--ink-3);font-size:13.5px}
 .somat-t{width:100%;border-collapse:collapse;font-size:14px}
 .somat-t th,.somat-t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
 .somat-t th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
@@ -194,7 +198,7 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
     </div>
     <p class="autoinfo">🔄 Atualização automática do aditivo: <b>todo dia às 22h30</b> (horário de Brasília). Última verificação: <b id="autoLast">—</b>.</p>
     <nav class="jump" aria-label="Atalhos">
-      <a href="#resumo">Resumo</a><a href="#quando">Quando</a><a href="#onde">Onde</a><a href="#quem">Quem executou</a><a href="#publicos">Para quem</a><a href="#validacao">Validação</a><a href="#acoes">Lista de ações</a><a href="#obsMunicipios">Municípios</a><a href="#metodologia">Como ler os dados</a><a href="#faq">Perguntas frequentes</a>
+      <a href="#resumo">Resumo</a><a href="#quando">Quando</a><a href="#onde">Onde</a><a href="#mapa">Mapa</a><a href="#quem">Quem executou</a><a href="#publicos">Para quem</a><a href="#validacao">Validação</a><a href="#acoes">Lista de ações</a><a href="#obsMunicipios">Municípios</a><a href="#metodologia">Como ler os dados</a><a href="#faq">Perguntas frequentes</a>
     </nav>
   </div>
 </header>
@@ -269,6 +273,11 @@ footer{padding:30px 0 50px;color:var(--ink-3);font-size:13px;border-top:1px soli
       <div class="card"><h3>Ações socioculturais: linguagens</h3><p class="q">Linguagens presentes nas ações com atividade sociocultural. Uma ação pode ter mais de uma.</p><div class="bars" id="bLing"></div></div>
     </div>
   </section>
+
+  <div class="mapcta" id="mapa">
+    <a class="mapbtn" href="https://mapa-acoes-comites-cultura.vercel.app" target="_blank" rel="noopener noreferrer">🗺 Veja as ações no mapa <span aria-hidden="true">↗</span></a>
+    <span class="mapnote">Brasil inteiro, município por município, separadas por Ano I, Ano II, Ano I + Ano II, Aditivo e Total.</span>
+  </div>
 
   <section id="quem">
     <h2>O que foi feito e quem executou</h2>
