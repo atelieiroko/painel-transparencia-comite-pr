@@ -91,4 +91,5 @@ await writeFile(`${OUT}/geo/centroides.json`, JSON.stringify(usados));
 await writeFile(`${OUT}/geo/meta.json`, JSON.stringify({ ufs: ufCodes, gerado: new Date().toISOString(), fonte: `${BASE} (qualidade mínima)` }));
 
 await copyFile('src/index.html', `${OUT}/index.html`);
+await copyFile('src/robots.txt', `${OUT}/robots.txt`);
 console.log(`Pronto: ${acoes.length} ações, ${codes.size} municípios com ação, ${ufCodes.length} UFs com malha municipal.`);
